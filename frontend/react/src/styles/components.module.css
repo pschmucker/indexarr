@@ -121,3 +121,47 @@
 .status-missing {
   background-color: var(--color-status-missing);
 }
+
+/* Filter Chips */
+.filter-chip {
+  border: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+
+.filter-chip:hover {
+  background: var(--color-background-tertiary);
+  border-color: var(--color-border-secondary);
+}
+
+.filter-chip-active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-accent);
+  color: var(--color-primary-dark);
+}
+
+.filter-chip-active:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-accent);
+}
+
+.filter-chip-badge {
+  background: var(--color-primary-accent);
+  color: var(--color-primary-dark);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 99px;
+  min-width: 18px;
+  text-align: center;
+}
+

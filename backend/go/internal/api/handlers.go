@@ -29,6 +29,7 @@ func ListMovies(db *sql.DB) http.HandlerFunc {
 			Codec:      r.URL.Query().Get("codec"),
 			Audio:      r.URL.Query().Get("audio"),
 			HDR:        r.URL.Query().Get("hdr"),
+			Search:     r.URL.Query().Get("search"),
 			Page:       page,
 			PageSize:   pageSize,
 		}
@@ -84,6 +85,7 @@ func ListSeries(db *sql.DB) http.HandlerFunc {
 			Codec:      r.URL.Query().Get("codec"),
 			Audio:      r.URL.Query().Get("audio"),
 			HDR:        r.URL.Query().Get("hdr"),
+			Search:     r.URL.Query().Get("search"),
 			Page:       page,
 			PageSize:   pageSize,
 		}
