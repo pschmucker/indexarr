@@ -1,12 +1,30 @@
+import { useEffect, useRef } from 'react';
 import styles from '../styles/topbar.module.css';
 
 interface TopbarProps {
   showBack: boolean;
   breadcrumb: string;
   onBack: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-export const Topbar = ({ showBack, breadcrumb, onBack }: TopbarProps) => {
+export const Topbar = ({ showBack, breadcrumb, onBack, searchQuery = '', onSearchChange }: TopbarProps) => {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Focus search input when "/" is pressed
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 20px', height: '56px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
       {showBack && (
@@ -33,21 +51,26 @@ export const Topbar = ({ showBack, breadcrumb, onBack }: TopbarProps) => {
           <path d="M10.5 10.5l2.5 2.5" />
         </svg>
         <input
+          ref={searchInputRef}
           type="text"
           className={styles['search-input']}
           placeholder="Rechercher…"
+          value={searchQuery}
+          onChange={(e) => onSearchChange?.(e.target.value)}
           onFocus={(e) => {
-            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]');
+            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]') as HTMLElement;
             if (shortcut) shortcut.style.display = 'none';
           }}
           onBlur={(e) => {
-            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]');
-            if (shortcut) shortcut.style.display = 'block';
+            const shortcut = e.currentTarget.parentElement?.querySelector('[data-shortcut]') as HTMLElement;
+            if (shortcut && !e.target.value) shortcut.style.display = 'block';
           }}
         />
-        <span className={styles.shortcut} data-shortcut>
-          /
-        </span>
+        {!searchQuery && (
+          <span className={styles.shortcut} data-shortcut>
+            /
+          </span>
+        )}
       </div>
     </div>
   );

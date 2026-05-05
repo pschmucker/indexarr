@@ -23,6 +23,23 @@ func GetMovies(db *sql.DB, filters *models.FilterCriteria) ([]models.Movie, int6
 	if filters.Status != "" {
 		where += fmt.Sprintf(" AND status='%s'", filters.Status)
 	}
+	if filters.Search != "" {
+		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
+	}
+
+	// Filters requiring joins to related tables
+	if filters.Resolution != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND resolution LIKE '%%%s%%')", filters.Resolution)
+	}
+	if filters.Codec != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND codec LIKE '%%%s%%')", filters.Codec)
+	}
+	if filters.Audio != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM audio_tracks WHERE movie_id = movies.id AND codec LIKE '%%%s%%')", filters.Audio)
+	}
+	if filters.HDR != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM video_tracks WHERE movie_id = movies.id AND hdr LIKE '%%%s%%')", filters.HDR)
+	}
 
 	// Count total
 	var total int64
@@ -154,6 +171,23 @@ func GetSeries(db *sql.DB, filters *models.FilterCriteria) ([]models.Series, int
 	where := "1=1"
 	if filters.Status != "" {
 		where += fmt.Sprintf(" AND status='%s'", filters.Status)
+	}
+	if filters.Search != "" {
+		where += fmt.Sprintf(" AND title LIKE '%%%s%%'", filters.Search)
+	}
+
+	// Filters requiring joins to related tables (episodes -> video/audio tracks)
+	if filters.Resolution != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.resolution LIKE '%%%s%%')", filters.Resolution)
+	}
+	if filters.Codec != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.codec LIKE '%%%s%%')", filters.Codec)
+	}
+	if filters.Audio != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN audio_tracks at ON e.id = at.episode_id WHERE e.series_id = series.id AND at.codec LIKE '%%%s%%')", filters.Audio)
+	}
+	if filters.HDR != "" {
+		where += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM episodes e JOIN video_tracks vt ON e.id = vt.episode_id WHERE e.series_id = series.id AND vt.hdr LIKE '%%%s%%')", filters.HDR)
 	}
 
 	var total int64
@@ -308,27 +342,27 @@ func GetStats(db *sql.DB) (*models.StatsResponse, error) {
 
 	// Total movies
 	db.QueryRow("SELECT COUNT(*) FROM movies").Scan(&stats.TotalMovies)
-	
+
 	// Total series
 	db.QueryRow("SELECT COUNT(*) FROM series").Scan(&stats.TotalSeries)
-	
+
 	// Total episodes
 	db.QueryRow("SELECT COUNT(*) FROM episodes").Scan(&stats.TotalEpisodes)
-	
+
 	// Available/missing counts
 	db.QueryRow("SELECT COUNT(*) FROM movies WHERE status='available'").Scan(&stats.AvailMovies)
 	db.QueryRow("SELECT COUNT(*) FROM movies WHERE status='missing'").Scan(&stats.MissingMovies)
 	db.QueryRow("SELECT COUNT(*) FROM episodes WHERE status='available'").Scan(&stats.AvailEpisodes)
 	db.QueryRow("SELECT COUNT(*) FROM episodes WHERE status='missing'").Scan(&stats.MissingEpisodes)
-	
+
 	// Problems count (missing files)
 	stats.ProblemsCount = stats.MissingMovies + stats.MissingEpisodes
-	
+
 	// Disk space in GB
 	var totalBytes int64
 	db.QueryRow("SELECT COALESCE(SUM(file_size), 0) FROM movies WHERE status='available' UNION ALL SELECT COALESCE(SUM(file_size), 0) FROM episodes WHERE status='available'").Scan(&totalBytes)
 	stats.DiskSpaceGB = float64(totalBytes) / (1024 * 1024 * 1024)
-	
+
 	// 4K count
 	query := `
 		SELECT COUNT(DISTINCT CASE WHEN vt.resolution LIKE '3840%' THEN m.id END) FROM movies m

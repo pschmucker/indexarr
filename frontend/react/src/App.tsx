@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ListFilms } from './pages/ListFilms';
@@ -11,6 +11,8 @@ import './styles/variables.css';
 
 const AppContent = () => {
   const context = useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState('');
+  
   if (!context) return null;
 
   const { currentPage, selectedId, goToPage, goBack, history } = context;
@@ -26,16 +28,28 @@ const AppContent = () => {
     <div className={layoutStyles.layout}>
       <Sidebar activeNav={currentPage} onNavClick={goToPage} />
       <div className={layoutStyles.main}>
-        <Topbar showBack={showBack} breadcrumb={breadcrumb} onBack={goBack} />
+        <Topbar 
+          showBack={showBack} 
+          breadcrumb={breadcrumb} 
+          onBack={goBack}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
         <div className={layoutStyles.content}>
           {currentPage === 'list-films' && (
             <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <ListFilms onSelectMovie={(id) => goToPage('detail-movie', id)} />
+              <ListFilms 
+                onSelectMovie={(id) => goToPage('detail-movie', id)}
+                searchQuery={searchQuery}
+              />
             </div>
           )}
           {currentPage === 'list-series' && (
             <div className={layoutStyles.page + ' ' + layoutStyles.active}>
-              <ListSeries onSelectSeries={(id) => goToPage('detail-series', id)} />
+              <ListSeries 
+                onSelectSeries={(id) => goToPage('detail-series', id)}
+                searchQuery={searchQuery}
+              />
             </div>
           )}
           {currentPage === 'detail-movie' && selectedId && (
