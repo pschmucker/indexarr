@@ -1,0 +1,123 @@
+.card {
+  background-color: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 14px;
+  transition: all 0.15s ease;
+}
+
+.stat {
+  background-color: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 14px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.stat-sub {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+}
+
+.badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-full);
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-4k {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-4k);
+  color: var(--color-badge-4k-text);
+}
+
+.badge-1080p {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-1080p);
+  color: var(--color-badge-1080p-text);
+}
+
+.badge-dv {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-dv);
+  color: var(--color-badge-dv-text);
+}
+
+.badge-hdr {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-hdr);
+  color: var(--color-badge-hdr-text);
+}
+
+.badge-missing {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-badge-missing);
+  color: var(--color-badge-missing-text);
+}
+
+.badge-codec {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+  display: inline-block;
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.status-ok {
+  background-color: var(--color-status-ok);
+}
+
+.status-warning {
+  background-color: var(--color-status-warning);
+}
+
+.status-missing {
+  background-color: var(--color-status-missing);
+}

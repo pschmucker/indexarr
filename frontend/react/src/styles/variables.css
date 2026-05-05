@@ -1,0 +1,99 @@
+:root {
+  /* Backgrounds */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F5F5F5;
+  --color-background-tertiary: #EBEBEB;
+
+  /* Text */
+  --color-text-primary: #000000;
+  --color-text-secondary: #606060;
+  --color-text-tertiary: #999999;
+
+  /* Borders */
+  --color-border-tertiary: #D9D9D9;
+  --color-border-secondary: #B3B3B3;
+
+  /* Brand */
+  --color-primary: #1D9E75;
+  --color-primary-light: #E1F5EE;
+  --color-primary-accent: #5DCAA5;
+  --color-primary-dark: #085041;
+  --color-primary-badge: #9FE1CB;
+
+  /* Status */
+  --color-status-ok: #1D9E75;
+  --color-status-warning: #EF9F27;
+  --color-status-missing: #E24B4A;
+
+  /* Badges */
+  --color-badge-4k: #FAEEDA;
+  --color-badge-4k-text: #633806;
+  --color-badge-1080p: #EAF3DE;
+  --color-badge-1080p-text: #27500A;
+  --color-badge-dv: #EEEDFE;
+  --color-badge-dv-text: #3C3489;
+  --color-badge-hdr: #E6F1FB;
+  --color-badge-hdr-text: #0C447C;
+  --color-badge-missing: #FCEBEB;
+  --color-badge-missing-text: #791F1F;
+
+  /* Dimensions */
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-full: 99px;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Courier New", monospace;
+
+  /* Layout */
+  --sidebar-width: 210px;
+  --topbar-height: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1a1a1a;
+    --color-background-secondary: #2a2a2a;
+    --color-background-tertiary: #3a3a3a;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #CCCCCC;
+    --color-text-tertiary: #999999;
+    --color-border-tertiary: #404040;
+    --color-border-secondary: #606060;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-primary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+button {
+  font-family: var(--font-sans);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

@@ -1,0 +1,103 @@
+.sidebar {
+  padding: 16px 18px 14px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logo-mark {
+  width: 22px;
+  height: 22px;
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.nav {
+  padding: 10px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-group {
+  padding: 8px 14px 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 18px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.nav-item:hover:not(.active) {
+  background-color: var(--color-background-secondary);
+}
+
+.nav-item.active {
+  color: var(--color-primary-dark);
+  border-left-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  font-weight: 500;
+}
+
+.nav-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--border-radius-full);
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-tertiary);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+
+.nav-item.active .nav-badge {
+  background-color: var(--color-primary-badge);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-accent);
+}
+
+.footer {
+  padding: 12px 18px;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  flex-shrink: 0;
+}
