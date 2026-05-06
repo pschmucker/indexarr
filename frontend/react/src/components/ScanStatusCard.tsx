@@ -9,7 +9,6 @@ interface ScanStatusProps {
 
 export const ScanStatusCard = ({ onScanComplete }: ScanStatusProps) => {
   const [status, setStatus] = useState<ScanStatusType | null>(null);
-  const [loading, setLoading] = useState(false);
   const [triggering, setTriggering] = useState(false);
   const onScanCompleteRef = useRef(onScanComplete);
 

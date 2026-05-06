@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
 import styles from '../styles/sidebar.module.css';
+import { Page } from '../hooks/useAppContext';
 
 interface SidebarProps {
   activeNav: string;
-  onNavClick: (page: string) => void;
+  onNavClick: (page: Page, id?: number) => void;
 }
 
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {

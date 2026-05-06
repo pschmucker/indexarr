@@ -15,7 +15,7 @@ const AppContent = () => {
   
   if (!context) return null;
 
-  const { currentPage, selectedId, goToPage, goBack, history } = context;
+  const { currentPage, selectedId, goToPage, goBack } = context;
   const showBack = currentPage.startsWith('detail-');
   const breadcrumb =
     currentPage === 'detail-movie'
