@@ -10,8 +10,6 @@ export const Layout = ({ children }: LayoutProps) => {
   const context = useContext(AppContext);
   if (!context) return null;
 
-  const { currentPage, goToPage, goBack, history } = context;
-
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%', background: 'var(--color-background-tertiary)' }}>
       {/* Sidebar will be added here */}

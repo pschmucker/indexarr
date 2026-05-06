@@ -1,4 +1,4 @@
-import { Movie, Series, Episode, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse } from '../types/index';
+import { Movie, Series, PaginatedResponse, StatsResponse, ScanStatus, ScanResponse } from '../types/index';
 
 const API_BASE = '/api';
 

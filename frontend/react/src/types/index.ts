@@ -14,6 +14,7 @@ export interface Movie {
   dateAdded: string;
   tmdbId: number;
   imdbId: string;
+  poster?: string;
   cast: Cast[];
   mediaInfo?: MediaInfo;
 }
@@ -34,6 +35,7 @@ export interface Series {
   dateAdded: string;
   tvdbId: number;
   imdbId: string;
+  poster?: string;
   cast: Cast[];
   seasons: Season[];
 }
