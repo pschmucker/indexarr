@@ -149,3 +149,18 @@ func respondError(w http.ResponseWriter, code int, message string) {
 		"error":   message,
 	})
 }
+
+func Purge(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := repository.PurgeDatabase(db)
+		if err != nil {
+			respondError(w, 500, "Failed to purge database: "+err.Error())
+			return
+		}
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Database purged successfully",
+		})
+	}
+}

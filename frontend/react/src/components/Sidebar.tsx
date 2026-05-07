@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import styles from '../styles/sidebar.module.css';
 import { Page } from '../hooks/useAppContext';
+import { apiClient } from '../api/client';
 
 interface SidebarProps {
   activeNav: string;
@@ -7,6 +9,25 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
+  const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
+
+  const handlePurge = async () => {
+    setIsPurging(true);
+    try {
+      const result = await apiClient.purgeDatabase();
+      if (result.success) {
+        setShowPurgeConfirm(false);
+        // Reload the page to refresh the UI
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Purge failed:', error);
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
   return (
     <div className={styles.sidebar}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -76,6 +97,99 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
         </div>
       </nav>
 
+      <div>
+        <button
+          onClick={() => setShowPurgeConfirm(true)}
+          style={{
+            marginTop: '8px',
+            padding: '6px 12px',
+            fontSize: '11px',
+            background: '#FCEBEB',
+            color: '#791F1F',
+            border: '0.5px solid #F09595',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            width: '100%',
+            fontWeight: 500,
+          }}
+        >
+          Purger DB
+        </button>
+
+        {showPurgeConfirm && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => !isPurging && setShowPurgeConfirm(false)}
+          >
+            <div
+              style={{
+                background: 'var(--color-background-primary)',
+                padding: '20px',
+                borderRadius: '8px',
+                border: '0.5px solid var(--color-border-tertiary)',
+                maxWidth: '300px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 500 }}>
+                Confirmer la suppression
+              </h3>
+              <p style={{ margin: '0 0 16px 0', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                Cette action supprimera tous les films et séries de la base de données. Cette opération ne peut pas être annulée.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setShowPurgeConfirm(false)}
+                  disabled={isPurging}
+                  style={{
+                    flex: 1,
+                    padding: '8px',
+                    fontSize: '11px',
+                    background: 'var(--color-background-secondary)',
+                    color: 'var(--color-text-primary)',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handlePurge}
+                  disabled={isPurging}
+                  style={{
+                    flex: 1,
+                    padding: '8px',
+                    fontSize: '11px',
+                    background: '#E24B4A',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: isPurging ? 'not-allowed' : 'pointer',
+                    fontWeight: 500,
+                    opacity: isPurging ? 0.6 : 1,
+                  }}
+                >
+                  {isPurging ? 'Suppression...' : 'Supprimer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
       <div className={styles.footer}>
         <div className={styles['status-dot']} />
         <span>Système opérationnel</span>

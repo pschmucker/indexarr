@@ -53,4 +53,9 @@ export const apiClient = {
     const response = await fetch(`${API_BASE}/scan/stop`, { method: 'POST' });
     return response.json() as Promise<ScanResponse>;
   },
+
+  purgeDatabase: async () => {
+    const response = await fetch(`${API_BASE}/purge`, { method: 'POST' });
+    return response.json() as Promise<{ success: boolean; message?: string; error?: string }>;
+  },
 };

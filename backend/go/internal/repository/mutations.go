@@ -297,3 +297,33 @@ func EpisodeExistsByPath(db *sql.DB, filePath string) (bool, error) {
 	err := db.QueryRow(`SELECT COUNT(*) FROM episodes WHERE file_path = ?`, filePath).Scan(&count)
 	return count > 0, err
 }
+
+// PurgeDatabase deletes all content from the database
+func PurgeDatabase(db *sql.DB) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Delete in reverse order of foreign key dependencies
+	tables := []string{
+		"subtitle_tracks",
+		"audio_tracks",
+		"video_tracks",
+		"cast",
+		"episodes",
+		"seasons",
+		"series",
+		"movies",
+	}
+
+	for _, table := range tables {
+		_, err := tx.Exec("DELETE FROM " + table)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
