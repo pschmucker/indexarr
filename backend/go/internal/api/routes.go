@@ -43,6 +43,9 @@ func SetupRoutes(db *sql.DB, scheduler *services.Scheduler) *chi.Mux {
 		// Stats
 		r.Get("/stats", GetStats(db))
 
+		// Purge
+		r.Post("/purge", Purge(db))
+
 		// Scan (only if scheduler is provided)
 		if scheduler != nil {
 			r.Post("/scan", TriggerScan(scheduler))
