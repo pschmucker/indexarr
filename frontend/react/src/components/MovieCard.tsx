@@ -17,7 +17,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
   const statusColor = movie.status === 'available' ? '#1D9E75' : movie.status === 'missing' ? '#E24B4A' : '#EF9F27';
 
   return (
-    <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
+    <div style={{ background: 'var(--color-background-secondary)', border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
       <div
         style={{
           width: '100%',
@@ -61,9 +61,14 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           {movie.title}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && <span className={comStyles['badge-4k']}>4K</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && <span className={comStyles['badge-4k']}>4K</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && <span className={comStyles['badge-hdr']}>HDR10</span>}
+          {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'TrueHD') && <span className={comStyles['badge-truehd']}>TrueHD</span>}
+          {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'E-AC-3') && <span className={comStyles['badge-ddplus']}>DD+</span>}
+          {movie.mediaInfo?.audioTracks.find((track) => track.codec.includes('Atmos')) && <span className={comStyles['badge-atmos']}>Atmos</span>}
+          {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'DTS') && <span className={comStyles['badge-dts']}>DTS</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.codec && <span className={comStyles['badge-codec']}>{movie.mediaInfo.videoTracks?.[0]?.codec}</span>}
           {movie.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
         </div>

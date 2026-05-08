@@ -1,17 +1,18 @@
 :root {
   /* Backgrounds */
-  --color-background-primary: #FFFFFF;
-  --color-background-secondary: #F5F5F5;
-  --color-background-tertiary: #EBEBEB;
+  --color-background-primary: light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1));
+  --color-background-secondary: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
+  --color-background-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
 
   /* Text */
-  --color-text-primary: #000000;
-  --color-text-secondary: #606060;
-  --color-text-tertiary: #999999;
+  --color-text-primary: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+  --color-text-secondary: light-dark(rgba(61, 61, 58, 1), rgba(194, 192, 182, 1));
+  --color-text-tertiary: light-dark(rgba(115, 114, 108, 1), rgba(156, 154, 146, 1));
 
   /* Borders */
-  --color-border-tertiary: #D9D9D9;
-  --color-border-secondary: #B3B3B3;
+  --color-border-primary: light-dark(rgba(31, 30, 29, 0.4), rgba(222, 220, 209, 0.4));
+  --color-border-secondary: light-dark(rgba(31, 30, 29, 0.3), rgba(222, 220, 209, 0.3));
+  --color-border-tertiary: light-dark(rgba(31, 30, 29, 0.15), rgba(222, 220, 209, 0.15));
 
   /* Brand */
   --color-primary: #1D9E75;
@@ -34,8 +35,18 @@
   --color-badge-dv-text: #3C3489;
   --color-badge-hdr: #E6F1FB;
   --color-badge-hdr-text: #0C447C;
+  --color-badge-truehd: #E8F8F5;
+  --color-badge-truehd-text: #1B5E50;
+  --color-badge-ddplus: #E8F8F5;
+  --color-badge-ddplus-text: #1B5E50;
+  --color-badge-atmos: #E8F8F5;
+  --color-badge-atmos-text: #1B5E50;
+  --color-badge-dts: #E8F8F5;
+  --color-badge-dts-text: #1B5E50;
   --color-badge-missing: #FCEBEB;
   --color-badge-missing-text: #791F1F;
+  --color-badge-problem: #FCEBEB;
+  --color-badge-problem-text: #791F1F;
 
   /* Dimensions */
   --border-radius-md: 6px;
@@ -51,16 +62,85 @@
   --topbar-height: 56px;
 }
 
+/* Dark mode via data-theme attribute (manual override) */
+html[data-theme="dark"] {
+  --color-background-primary: #1a1a1a;
+  --color-background-secondary: #2a2a2a;
+  --color-background-tertiary: #3a3a3a;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
+  --color-text-tertiary: #999999;
+  --color-border-primary: #808080;
+  --color-border-secondary: #606060;
+  --color-border-tertiary: #404040;
+
+  --color-badge-4k: #633806;
+  --color-badge-4k-text: #FAEEDA;
+  --color-badge-1080p: #27500A;
+  --color-badge-1080p-text: #EAF3DE;
+  --color-badge-dv: #3C3489;
+  --color-badge-dv-text: #EEEDFE;
+  --color-badge-hdr: #0C447C;
+  --color-badge-hdr-text: #E6F1FB;
+  --color-badge-truehd: #1B5E50;
+  --color-badge-truehd-text: #E8F8F5;
+  --color-badge-ddplus: #1B5E50;
+  --color-badge-ddplus-text: #E8F8F5;
+  --color-badge-atmos: #1B5E50;
+  --color-badge-atmos-text: #E8F8F5;
+  --color-badge-dts: #1B5E50;
+  --color-badge-dts-text: #E8F8F5;
+  --color-badge-missing: #791F1F;
+  --color-badge-missing-text: #FCEBEB;
+  --color-badge-problem: #791F1F;
+  --color-badge-problem-text: #FCEBEB;
+
+  --color-primary: #9FE1CB;
+  --color-primary-light: #085041;
+  --color-primary-accent: #5DCAA5;
+  --color-primary-dark: #E1F5EE;
+  --color-primary-badge: #1D9E75;
+}
+
+/* Fallback: Dark mode via system preference (when no manual preference set) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  html:not([data-theme]) {
     --color-background-primary: #1a1a1a;
     --color-background-secondary: #2a2a2a;
     --color-background-tertiary: #3a3a3a;
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #CCCCCC;
     --color-text-tertiary: #999999;
-    --color-border-tertiary: #404040;
+    --color-border-primary: #808080;
     --color-border-secondary: #606060;
+    --color-border-tertiary: #404040;
+
+    --color-badge-4k: #633806;
+    --color-badge-4k-text: #FAEEDA;
+    --color-badge-1080p: #27500A;
+    --color-badge-1080p-text: #EAF3DE;
+    --color-badge-dv: #3C3489;
+    --color-badge-dv-text: #EEEDFE;
+    --color-badge-hdr: #0C447C;
+    --color-badge-hdr-text: #E6F1FB;
+    --color-badge-truehd: #1B5E50;
+    --color-badge-truehd-text: #E8F8F5;
+    --color-badge-ddplus: #1B5E50;
+    --color-badge-ddplus-text: #E8F8F5;
+    --color-badge-atmos: #1B5E50;
+    --color-badge-atmos-text: #E8F8F5;
+    --color-badge-dts: #1B5E50;
+    --color-badge-dts-text: #E8F8F5;
+    --color-badge-missing: #791F1F;
+    --color-badge-missing-text: #FCEBEB;
+    --color-badge-problem: #791F1F;
+    --color-badge-problem-text: #FCEBEB;
+
+    --color-primary: #9FE1CB;
+    --color-primary-light: #085041;
+    --color-primary-accent: #5DCAA5;
+    --color-primary-dark: #E1F5EE;
+    --color-primary-badge: #1D9E75;
   }
 }
 
