@@ -3,30 +3,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: indexarr:latest
-    container_name: indexarr
+    container_name: indexarr-dev
     restart: unless-stopped
     ports:
-      - "8787:8787"
+      - 8787:8787
     volumes:
-      # Persistent database storage
-      - indexarr_data:/app/data
+      - data:/app/data
       # Optional: Mount your media library (read-only recommended)
-      - ${MOVIES_PATH}:/media/movies:ro
-      - ${SERIES_PATH}:/media/series:ro
+      - ${MOVIES_PATH}:/data/movies:ro
+      - ${SERIES_PATH}:/data/tv-shows:ro
     environment:
-      # Server configuration
-      - SERVER_PORT=8080
-      - DB_PATH=/app/data/indexarr.db
-      - MEDIAINFO_PATH=/usr/bin/mediainfo
-      - GIN_MODE=release
-      
       # API keys (replace with your actual keys or use .env file)
-      - TMDB_API_KEY=${TMDB_API_KEY:-your_tmdb_api_key_here}
-      - TVDB_API_KEY=${TVDB_API_KEY:-your_tvdb_api_key_here}
-      
-      # Media library paths (comma-separated, adjust to your mounted volumes)
-      - MEDIA_LIBRARY_PATHS=${MEDIA_LIBRARY_PATHS:-/media/movies,/media/series}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TVDB_API_KEY=${TVDB_API_KEY}
       
       # Scan configuration
       - SCAN_INTERVAL=${SCAN_INTERVAL:-24}
@@ -37,5 +26,12 @@ services:
 
 
 volumes:
-  indexarr_data:
+  data:
+    name: indexarr-data
     driver: local
+
+
+networks:
+  default:
+    name: indexarr
+    driver: bridge
