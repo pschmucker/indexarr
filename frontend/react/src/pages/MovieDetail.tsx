@@ -294,7 +294,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             ))}
 
             {/* Subtitles */}
-            {movie.mediaInfo?.subtitleTracks.map((subtitleTrack, index) => (
+            {(movie.mediaInfo?.subtitleTracks ?? []).map((subtitleTrack, index) => (
               <Fragment key={index}>
                 <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
