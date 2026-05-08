@@ -9,7 +9,7 @@ services:
       - data:/app/data
       # Optional: Mount your media library (read-only recommended)
       - ${MOVIES_PATH}:/data/movies:ro
-      - ${SERIES_PATH}:/data/tv-shows:ro
+      - ${TV_SHOWS_PATH}:/data/tv-shows:ro
     environment:
       # API keys (replace with your actual keys or use .env file)
       TMDB_API_KEY: ${TMDB_API_KEY}
