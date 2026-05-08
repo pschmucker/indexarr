@@ -19,9 +19,9 @@ interface AppContextProviderProps {
 }
 
 export const AppContextProvider = ({ children }: AppContextProviderProps) => {
-  const [currentPage, setCurrentPage] = useState<Page>('list-series');
+  const [currentPage, setCurrentPage] = useState<Page>('list-films');
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [history, setHistory] = useState<Page[]>(['list-series']);
+  const [history, setHistory] = useState<Page[]>(['list-films']);
   const [isDark, setIsDark] = useState(false);
 
   const goToPage = (page: Page, id?: number) => {
