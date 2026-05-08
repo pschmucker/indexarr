@@ -190,6 +190,17 @@ func (e *Extractor) parseHDR(track MediainfoTrack) string {
 
 	// Check for Dolby Vision
 	if strings.Contains(strings.ToLower(hdrFormat), "dolby vision") {
+		if (strings.Contains(strings.ToLower(hdrCompat), "hdr10+")) &&
+			track.BitDepth == "10" {
+
+			return "Dolby Vision / HDR10+"
+		}
+		if (strings.Contains(strings.ToLower(hdrCompat), "hdr10")) &&
+			track.BitDepth == "10" {
+
+			return "Dolby Vision / HDR10"
+		}
+
 		return "Dolby Vision"
 	}
 
