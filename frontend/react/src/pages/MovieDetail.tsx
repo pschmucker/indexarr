@@ -82,7 +82,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <span>{movie.year}</span>
             <span>·</span>
-            <span>{movie.duration} min</span>
+            <span>{Math.floor(movie.duration / 60)}h {movie.duration % 60}min</span>
             <span>·</span>
             <span>{movie.genres}</span>
             <span>·</span>
