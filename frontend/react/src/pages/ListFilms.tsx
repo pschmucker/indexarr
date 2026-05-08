@@ -114,7 +114,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   const stats = useMemo(() => {
     const available = movies.filter((m) => m.status === 'available').length;
     const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
-    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
+    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160')).length;
     return { available, total: movies.length, diskSpace, fourK };
   }, [movies]);
 
