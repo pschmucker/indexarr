@@ -1,7 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useContext } from 'react';
 import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
+import { AppContext } from '../hooks/useAppContext';
 
 interface MovieDetailProps {
   movieId: number;
@@ -10,6 +11,7 @@ interface MovieDetailProps {
 export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
+  const appContext = useContext(AppContext);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -56,13 +58,33 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
         {/* Info */}
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             {movie.title}
+            {typeof movie.rating === 'number' && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: 'var(--color-badge-rating)',
+                color: 'var(--color-badge-rating-text)',
+                borderRadius: '99px',
+                fontSize: '12px',
+                fontWeight: 500,
+                padding: '2px 10px 2px 7px',
+                border: 'none',
+                lineHeight: 1,
+                minWidth: '36px',
+                height: '22px',
+              }}>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{movie.rating?.toFixed(1)}</span>
+              </span>
+            )}
           </h1>
           <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <span>{movie.year}</span>
             <span>·</span>
-            <span>{movie.duration} min</span>
+            <span>{Math.floor(movie.duration / 60)}h {movie.duration % 60}min</span>
             <span>·</span>
             <span>{movie.genres}</span>
             <span>·</span>
@@ -98,22 +120,22 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 HDR10
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'TrueHD') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
               <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 TrueHD
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'E-AC-3') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
               <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Dolby Digital Plus
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec.includes('Atmos')) && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
               <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Atmos
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'DTS') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
               <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 DTS
               </span>
@@ -132,12 +154,16 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-            <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-              + Rechercher upgrade
-            </button>
-            <button style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>
-              Ouvrir dans Radarr
-            </button>
+            {appContext?.config?.radarrUrl && (
+              <a href={`${appContext.config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/radarr-light.png" alt="Radarr Light" style={{ width: '12px', height: '12px' }} />
+                Radarr
+              </a>
+            )}
+            <a href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tmdb-light.png" alt="TMDB Light" style={{ width: '12px', height: '12px' }} />
+              TMDB
+            </a>
           </div>
         </div>
       </div>
@@ -203,7 +229,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           </h2>
           <div style={{ background: 'var(--color-background-tertiary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Video */}
-            {movie.mediaInfo?.videoTracks.map((videoTrack, index) => (
+            {(movie.mediaInfo?.videoTracks ?? []).map((videoTrack, index) => (
               <Fragment key={index}>
                 <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
@@ -268,7 +294,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             ))}
 
             {/* Audio */}
-            {movie.mediaInfo?.audioTracks.map((audioTrack, index) => (
+            {(movie.mediaInfo?.audioTracks ?? []).map((audioTrack, index) => (
               <Fragment key={index}>
                 <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>

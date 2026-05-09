@@ -44,14 +44,14 @@ func main() {
 		// Start scheduler if interval is configured
 		if cfg.ScanInterval > 0 {
 			scheduler.Start()
-			log.Printf("📡 Scheduler started with %d hour interval", cfg.ScanInterval)
+			log.Printf("Scheduler started with %d hour interval", cfg.ScanInterval)
 		}
 	} else {
 		log.Println("⚠️  No MEDIA_LIBRARY_PATHS configured, scanning disabled")
 	}
 
 	// Setup API router
-	router := api.SetupRoutes(db, scheduler)
+	router := api.SetupRoutes(db, cfg, scheduler)
 
 	// Handle graceful shutdown
 	go func() {
@@ -69,6 +69,7 @@ func main() {
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("🎬 Indexarr server running on http://localhost:%s", cfg.ServerPort)
+	log.Printf("📡 Radarr URL: %s", cfg.RadarrURL)
 	log.Printf("📁 Database: %s", cfg.DBPath)
 	if len(cfg.MediaLibraryPaths) > 0 {
 		log.Printf("📂 Library paths: %v", cfg.MediaLibraryPaths)
