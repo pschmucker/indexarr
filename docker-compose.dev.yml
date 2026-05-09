@@ -16,6 +16,9 @@ services:
       # API keys (replace with your actual keys or use .env file)
       - TMDB_API_KEY=${TMDB_API_KEY}
       - TVDB_API_KEY=${TVDB_API_KEY}
+
+      # External services
+      - RADARR_URL=${RADARR_URL:-http://radarr:7878}
       
       # Scan configuration
       - SCAN_INTERVAL=${SCAN_INTERVAL:-24}

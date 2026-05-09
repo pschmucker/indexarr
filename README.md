@@ -62,6 +62,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 - Docker and Docker Compose installed
 - TMDB and TVDB API keys (optional, but recommended for full metadata)
 
+
 #### Installation Steps
 
 1. **Create docker-compose file:**
@@ -108,6 +109,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `TVDB_API_KEY` | - | No | TVDB API key for tv-shows metadata ([get here](https://www.thetvdb.com/api-information)) |
 | `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
 | `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
+| `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
 | `SCAN_TIMEOUT` | 30 | No | Scan timeout in minutes |
 | `TZ` | UTC | No | Timezone (e.g., `Europe/Paris`, `America/New_York`) |
@@ -149,6 +151,7 @@ docker run -d -p 8787:8787 \
       -e TVDB_API_KEY=fffffffffffffffff \
       -e MOVIES_PATH=/movies \
       -e TV_SHOWS_PATH=/tv-shows \
+      -e RADARR_URL=http://radarr:7878 \
       -v indexarr_data:/app/data ghcr.io/pschmucker/indexarr:latest
 ```
 

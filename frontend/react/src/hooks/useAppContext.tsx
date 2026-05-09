@@ -1,6 +1,11 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
+import { apiClient } from '../api/client';
 
 export type Page = 'list-films' | 'list-series' | 'detail-movie' | 'detail-series';
+
+interface AppConfig {
+  radarrUrl: string;
+}
 
 interface AppContextType {
   currentPage: Page;
@@ -10,6 +15,8 @@ interface AppContextType {
   history: Page[];
   isDark: boolean;
   toggleTheme: () => void;
+  config: AppConfig | null;
+  configLoading: boolean;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -22,6 +29,26 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const [currentPage, setCurrentPage] = useState<Page>('list-films');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [history, setHistory] = useState<Page[]>(['list-films']);
+  const [config, setConfig] = useState<AppConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+
+  // Fetch config on mount
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const data = await apiClient.getConfig();
+        setConfig(data);
+      } catch (error) {
+        console.error('Failed to fetch config:', error);
+        // Fallback to default config
+        setConfig({ radarrUrl: '' });
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+
+    fetchConfig();
+  }, []);
 
   // Initialize theme from localStorage or system preference
   const [isDark, setIsDark] = useState(() => {
@@ -75,7 +102,7 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
   };
 
   return (
-    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme }}>
+    <AppContext.Provider value={{ currentPage, selectedId, goToPage, goBack, history, isDark, toggleTheme, config, configLoading }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,7 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useContext } from 'react';
 import { Movie } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
+import { AppContext } from '../hooks/useAppContext';
 
 interface MovieDetailProps {
   movieId: number;
@@ -10,6 +11,7 @@ interface MovieDetailProps {
 export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
+  const appContext = useContext(AppContext);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -152,12 +154,17 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-            <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-              + Rechercher upgrade
-            </button>
-            <button style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>
-              Ouvrir dans Radarr
-            </button>
+            {appContext?.config?.radarrUrl && (
+              <a href={`${appContext.config.radarrUrl}/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M2 7h10M8 4l3 3-3 3"></path>
+                </svg>
+                Ouvrir dans Radarr
+              </a>
+            )}
+            <a href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              TMDB
+            </a>
           </div>
         </div>
       </div>

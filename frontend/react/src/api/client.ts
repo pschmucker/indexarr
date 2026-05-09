@@ -38,6 +38,11 @@ export const apiClient = {
     return response.json() as Promise<StatsResponse>;
   },
 
+  getConfig: async () => {
+    const response = await fetch(`${API_BASE}/config`);
+    return response.json() as Promise<{ radarrUrl: string }>;
+  },
+
   // Scan endpoints
   triggerScan: async () => {
     const response = await fetch(`${API_BASE}/scan`, { method: 'POST' });

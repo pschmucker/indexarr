@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"indexarr/internal/config"
 	"indexarr/internal/models"
 	"indexarr/internal/repository"
 
@@ -133,6 +134,15 @@ func GetStats(db *sql.DB) http.HandlerFunc {
 		}
 
 		respond(w, stats)
+	}
+}
+
+// GetConfig returns application configuration
+func GetConfig(cfg *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		respond(w, map[string]interface{}{
+			"radarrUrl": cfg.RadarrURL,
+		})
 	}
 }
 

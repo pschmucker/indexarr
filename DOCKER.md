@@ -19,6 +19,7 @@ docker run -d \
   -e TVDB_API_KEY=your_key \
   -e MOVIES_PATH=/data/movies \
   -e TV_SHOWS_PATH=/data/tv-shows \
+  -e RADARR_URL=http://radarr:7878 \
   indexarr:latest
 
 # Pull from GitHub Container Registry
@@ -94,6 +95,7 @@ indexarr/
 | `MEDIAINFO_PATH` | `/usr/bin/mediainfo` | Path to mediainfo binary |
 | `TMDB_API_KEY` | - | TMDB API key (required) |
 | `TVDB_API_KEY` | - | TVDB API key (required) |
+| `RADARR_URL` | http://radarr:7878 | Radarr URL (optional) |
 | `MEDIA_LIBRARY_PATHS` | - | Comma-separated media folder paths |
 | `SCAN_INTERVAL` | `24` | Hours between automatic scans |
 | `SCAN_TIMEOUT` | `30` | Scan timeout in minutes |

@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"net/http"
 
+	"indexarr/internal/config"
 	"indexarr/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
-func SetupRoutes(db *sql.DB, scheduler *services.Scheduler) *chi.Mux {
+func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler) *chi.Mux {
 	r := chi.NewRouter()
 
 	// CORS middleware
@@ -32,6 +33,9 @@ func SetupRoutes(db *sql.DB, scheduler *services.Scheduler) *chi.Mux {
 
 	// API routes
 	r.Route("/api", func(r chi.Router) {
+		// Config
+		r.Get("/config", GetConfig(cfg))
+
 		// Movies
 		r.Get("/movies", ListMovies(db))
 		r.Get("/movies/{id}", GetMovie(db))
