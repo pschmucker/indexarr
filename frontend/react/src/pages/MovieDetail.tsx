@@ -120,22 +120,22 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 HDR10
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'TrueHD') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
               <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 TrueHD
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'E-AC-3') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
               <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Dolby Digital Plus
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec.includes('Atmos')) && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
               <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 Atmos
               </span>
             )}
-            {movie.mediaInfo?.audioTracks.find((track) => track.codec === 'DTS') && (
+            {(movie.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
               <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
                 DTS
               </span>
@@ -230,7 +230,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
           </h2>
           <div style={{ background: 'var(--color-background-tertiary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden' }}>
             {/* Video */}
-            {movie.mediaInfo?.videoTracks.map((videoTrack, index) => (
+            {(movie.mediaInfo?.videoTracks ?? []).map((videoTrack, index) => (
               <Fragment key={index}>
                 <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
@@ -295,7 +295,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
             ))}
 
             {/* Audio */}
-            {movie.mediaInfo?.audioTracks.map((audioTrack, index) => (
+            {(movie.mediaInfo?.audioTracks ?? []).map((audioTrack, index) => (
               <Fragment key={index}>
                 <div style={{ padding: '8px 8px 4px', background: 'var(--color-background-secondary)', fontSize: '10px', fontWeight: 500, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
