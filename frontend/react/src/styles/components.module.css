@@ -171,7 +171,7 @@
   border: 0.5px solid var(--color-border-tertiary);
   background: var(--color-background-secondary);
   border-radius: 99px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   font-size: 11px;
   color: var(--color-text-secondary);
   cursor: pointer;

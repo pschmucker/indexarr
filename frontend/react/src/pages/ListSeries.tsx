@@ -133,55 +133,55 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         
           <FilterChip
             label="Statut"
-          active={activeFilters.status.length > 0}
-          count={activeFilters.status.length}
-          onClick={() => setModalFilter('status')}
-        />
+            active={activeFilters.status.length > 0}
+            count={activeFilters.status.length}
+            onClick={() => setModalFilter('status')}
+          />
         
-        <FilterChip
-          label="Résolution"
-          active={activeFilters.resolution.length > 0}
-          count={activeFilters.resolution.length}
-          onClick={() => setModalFilter('resolution')}
-        />
-        
-        <FilterChip
-          label="Codec"
-          active={activeFilters.codec.length > 0}
-          count={activeFilters.codec.length}
-          onClick={() => setModalFilter('codec')}
-        />
-        
-        <FilterChip
-          label="Audio"
-          active={activeFilters.audio.length > 0}
-          count={activeFilters.audio.length}
-          onClick={() => setModalFilter('audio')}
-        />
-        
-        <FilterChip
-          label="HDR"
-          active={activeFilters.hdr.length > 0}
-          count={activeFilters.hdr.length}
-          onClick={() => setModalFilter('hdr')}
-        />
+          <FilterChip
+            label="Résolution"
+            active={activeFilters.resolution.length > 0}
+            count={activeFilters.resolution.length}
+            onClick={() => setModalFilter('resolution')}
+          />
+          
+          <FilterChip
+            label="Codec"
+            active={activeFilters.codec.length > 0}
+            count={activeFilters.codec.length}
+            onClick={() => setModalFilter('codec')}
+          />
+          
+          <FilterChip
+            label="Audio"
+            active={activeFilters.audio.length > 0}
+            count={activeFilters.audio.length}
+            onClick={() => setModalFilter('audio')}
+          />
+          
+          <FilterChip
+            label="HDR"
+            active={activeFilters.hdr.length > 0}
+            count={activeFilters.hdr.length}
+            onClick={() => setModalFilter('hdr')}
+          />
 
-        {getTotalActiveFilters() > 0 && (
-          <button
-            onClick={() => setActiveFilters({ status: [], resolution: [], codec: [], audio: [], hdr: [] })}
-            style={{
-              fontSize: '11px',
-              color: 'var(--color-text-tertiary)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              marginLeft: '4px',
-            }}
-          >
-            Effacer tout
-          </button>
-        )}
+          {getTotalActiveFilters() > 0 && (
+            <button
+              onClick={() => setActiveFilters({ status: [], resolution: [], codec: [], audio: [], hdr: [] })}
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-text-tertiary)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                marginLeft: '4px',
+              }}
+            >
+              Effacer tout
+            </button>
+          )}
         </div>
 
         <ViewToggle view={view} onViewChange={handleViewChange} />
