@@ -16,21 +16,21 @@ const AppContent = () => {
   if (!context) return null;
 
   const { currentPage, selectedId, goToPage, goBack } = context;
-  const showBack = currentPage.startsWith('detail-');
-  const breadcrumb =
-    currentPage === 'detail-movie'
-      ? 'Films / Interstellar'
-      : currentPage === 'detail-series'
-        ? 'Séries / Breaking Bad'
-        : '';
+  // const showBack = currentPage.startsWith('detail-');
+  // const breadcrumb =
+  //   currentPage === 'detail-movie'
+  //     ? 'Films / Interstellar'
+  //     : currentPage === 'detail-series'
+  //       ? 'Séries / Breaking Bad'
+  //       : '';
 
   return (
     <div className={layoutStyles.layout}>
       <Sidebar activeNav={currentPage} onNavClick={goToPage} />
       <div className={layoutStyles.main}>
         <Topbar 
-          showBack={showBack} 
-          breadcrumb={breadcrumb} 
+          showBack={false} 
+          breadcrumb="" 
           onBack={goBack}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
