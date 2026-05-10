@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -157,9 +156,6 @@ func (c *TVClient) GetEpisodeDetails(tmdbID, season, episode int) (*TMDBEpisodeD
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
 	params.Set("language", "fr-FR")
-
-	// Print the URL for debugging
-	log.Printf("Fetching episode details from TMDB: %s/tv/%d/season/%d/episode/%d?%s", tmdbBaseURL, tmdbID, season, episode, params.Encode())
 
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/tv/%d/season/%d/episode/%d?%s", tmdbBaseURL, tmdbID, season, episode, params.Encode()))
 	if err != nil {

@@ -248,9 +248,6 @@ func GetSeriesByID(db *sql.DB, id int64) (*models.Series, error) {
 		return nil, err
 	}
 
-	// Log series details for debugging
-	fmt.Printf("Fetched series: %+v\n", s)
-
 	// s.Cast, _ = GetCastForSeries(db, s.ID)
 	s.Seasons, _ = GetSeasonsForSeries(db, s.ID)
 	return &s, nil
@@ -278,28 +275,18 @@ func GetCastForSeries(db *sql.DB, seriesID int64) ([]models.Cast, error) {
 func GetSeasonsForSeries(db *sql.DB, seriesID int64) ([]models.Season, error) {
 	rows, err := db.Query("SELECT id, series_id, number, file_size FROM seasons WHERE series_id=? ORDER BY number", seriesID)
 	if err != nil {
-		// Log the error for debugging
-		fmt.Printf("Error querying seasons for series ID %d: %v\n", seriesID, err)
 		return nil, err
 	}
 
 	defer rows.Close()
-
-	// Log query execution for debugging
-	fmt.Printf("Executing query to fetch seasons for series ID %d\n", seriesID)
 
 	var seasons []models.Season
 	for rows.Next() {
 		var s models.Season
 		err := rows.Scan(&s.ID, &s.SeriesID, &s.Number, &s.FileSize)
 		if err != nil {
-			// Log the error for debugging
-			fmt.Printf("Error scanning season row for series ID %d: %v\n", seriesID, err)
 			return nil, err
 		}
-
-		// Log season details for debugging
-		fmt.Printf("Fetched season: %+v\n", s)
 
 		s.Episodes, _ = GetEpisodesForSeason(db, seriesID, s.Number)
 		// Calculate available/missing
@@ -312,9 +299,6 @@ func GetSeasonsForSeries(db *sql.DB, seriesID int64) ([]models.Season, error) {
 		}
 		seasons = append(seasons, s)
 	}
-
-	// Log seasons details for debugging
-	fmt.Printf("Fetched seasons: %+v\n", seasons)
 
 	return seasons, nil
 }
