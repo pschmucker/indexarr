@@ -38,7 +38,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
             <path d="M2 11L7 3L12 11Z" />
           </svg>
         </div>
-        <span className={styles['logo-name']}>Indexarr</span>
+        <span className={styles['logo-name']}>Index<span style={{ color: "#1d9e75" }}>arr</span></span>
       </div>
 
       <nav className={styles.nav}>
