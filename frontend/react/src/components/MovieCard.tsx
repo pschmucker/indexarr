@@ -61,7 +61,7 @@ export const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           {movie.title}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-          {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && <span className={comStyles['badge-4k']}>4K</span>}
+          {movie.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && <span className={comStyles['badge-4k']}>4K</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && <span className={comStyles['badge-dv']}>DV</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10+</span>}
           {movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !movie.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && <span className={comStyles['badge-hdr']}>HDR10</span>}
