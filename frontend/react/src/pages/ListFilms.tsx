@@ -26,10 +26,10 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
     { value: 'problem', label: 'Problème' },
   ],
   resolution: [
-    { value: '2160', label: '4K UHD (3840x2160)' },
-    { value: '1080', label: 'Full HD (1920x1080)' },
-    { value: '720', label: 'HD (1280x720)' },
-    { value: '480', label: 'SD (720x480)' },
+    { value: '3840', label: '4K UHD (3840x2160)' },
+    { value: '1920', label: 'Full HD (1920x1080)' },
+    { value: '1280', label: 'HD (1280x720)' },
+    { value: '720', label: 'SD (720x480)' },
   ],
   codec: [
     { value: 'AV1', label: 'AV1' },
@@ -124,7 +124,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   const loadedStats = useMemo(() => {
     const available = movies.filter((m) => m.status === 'available').length;
     const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
-    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160')).length;
+    const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
     const missing = movies.filter((m) => m.status === 'missing' || (m.fileSize || 0) === 0).length;
     return { available, total: movies.length, diskSpace, fourK, missing };
   }, [movies]);
@@ -214,7 +214,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px', padding: '0 20px' }}>
         <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
         <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${context?.stats?.fourKPercent || 0}%)`]} />
+        <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} />
         <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['fichiers manquants', `${context?.stats?.missingMovies || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
