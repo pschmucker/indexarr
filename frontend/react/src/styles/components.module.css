@@ -313,11 +313,25 @@
 }
 
 .card-list-content {
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+}
+
+.card-list-synopsis {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+  max-width: 50%;
+}
+
+@media (max-width: 800px) {
+  .card-list-synopsis {
+    display: none;
+  }
 }
 
 .card-list-title {
