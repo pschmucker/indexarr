@@ -18,15 +18,29 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
 
   return (
     <div className={comStyles['card-list']} onClick={onClick}>
-      <div className={comStyles['card-list-poster']}>
-        <div className={comStyles['card-list-poster-initial']}>
-          {initials}
+      {movie.poster ? (
+        <div className={comStyles['card-list-poster']}>
+          <img
+            src={movie.poster}
+            alt={movie.title}
+            width="100%"
+            height="100%"
+            style={{ objectFit: 'contain' }}
+            className={comStyles['card-list-poster-img']}
+          />
+          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
-        <div className={comStyles['card-list-poster-title']}>
-          {movie.title}
+      ) : (
+        <div className={comStyles['card-list-poster']}>
+          <div className={comStyles['card-list-poster-initial']}>
+            {initials}
+          </div>
+          <div className={comStyles['card-list-poster-title']}>
+            {movie.title}
+          </div>
+          <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
         </div>
-        <div className={comStyles['card-list-poster-status']} style={{ background: statusColor }} />
-      </div>
+      )}
 
       <div className={comStyles['card-list-content']}>
         <div className={comStyles['card-list-title']}>
