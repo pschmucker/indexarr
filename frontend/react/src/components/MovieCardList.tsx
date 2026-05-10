@@ -49,7 +49,7 @@ export const MovieCardList = ({ movie, onClick }: MovieCardListProps) => {
         <div className={comStyles['card-list-meta']}>
           <span>{movie.year}</span>
           <span>·</span>
-          <span>{movie.duration} min</span>
+          <span>{Math.floor(movie.duration / 60)}h {movie.duration % 60}min</span>
           <span>·</span>
           <span>{movie.genres}</span>
           <span>·</span>
