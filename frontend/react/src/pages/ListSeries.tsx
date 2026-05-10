@@ -77,7 +77,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   }, [activeFilters, searchQuery]);
 
   // Use infinite list hook for pagination
-  const { items: series, loading, hasMore, loadMore, reset } = useInfiniteList<Series>({
+  const { items: series, loading, isInitialLoading, hasMore, loadMore, reset } = useInfiniteList<Series>({
     fetchFn: apiClient.getSeries,
     pageSize: 50,
     filters,
@@ -197,7 +197,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       </div>
 
       {/* Grid or List */}
-      {loading ? (
+      {isInitialLoading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Chargement...
         </div>

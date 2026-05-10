@@ -13,6 +13,7 @@ interface UseInfiniteListReturn<T> {
   pageSize: number;
   total: number;
   loading: boolean;
+  isInitialLoading: boolean;
   error: string | null;
   hasMore: boolean;
   loadMore: () => void;
@@ -28,6 +29,7 @@ export function useInfiniteList<T>({
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isInitialMount = useRef(true);
 
@@ -55,6 +57,7 @@ export function useInfiniteList<T>({
           // Replace items (initial load or reset)
           setItems(response.data || []);
         }
+        setIsInitialLoading(false);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
@@ -81,6 +84,7 @@ export function useInfiniteList<T>({
     setPage(1);
     setTotal(0);
     setError(null);
+    setIsInitialLoading(true);
     loadPage(1, false);
   }, [loadPage]);
 
@@ -101,6 +105,7 @@ export function useInfiniteList<T>({
     pageSize,
     total,
     loading,
+    isInitialLoading,
     error,
     hasMore,
     loadMore,
