@@ -26,10 +26,10 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
     { value: 'problem', label: 'Problème' },
   ],
   resolution: [
-    { value: '2160', label: '4K UHD (3840x2160)' },
-    { value: '1080', label: 'Full HD (1920x1080)' },
-    { value: '720', label: 'HD (1280x720)' },
-    { value: '480', label: 'SD (720x480)' },
+    { value: '3840', label: '4K UHD (3840x2160)' },
+    { value: '1920', label: 'Full HD (1920x1080)' },
+    { value: '1280', label: 'HD (1280x720)' },
+    { value: '720', label: 'SD (720x480)' },
   ],
   codec: [
     { value: 'AV1', label: 'AV1' },
