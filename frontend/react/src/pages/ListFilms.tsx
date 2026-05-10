@@ -85,7 +85,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   }, [activeFilters, searchQuery]);
 
   // Use infinite list hook for pagination
-  const { items: movies, loading, hasMore, loadMore, reset } = useInfiniteList<Movie>({
+  const { items: movies, loading, isInitialLoading, hasMore, loadMore, reset } = useInfiniteList<Movie>({
     fetchFn: apiClient.getMovies,
     pageSize: 50,
     filters,
@@ -220,7 +220,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
       </div>
 
       {/* Grid or List */}
-      {loading ? (
+      {isInitialLoading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
           Chargement...
         </div>
