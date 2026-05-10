@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -157,6 +158,9 @@ func (c *TVClient) GetEpisodeDetails(tmdbID, season, episode int) (*TMDBEpisodeD
 	params.Set("api_key", c.apiKey)
 	params.Set("language", "fr-FR")
 
+	// Print the URL for debugging
+	log.Printf("Fetching episode details from TMDB: %s/tv/%d/season/%d/episode/%d?%s", tmdbBaseURL, tmdbID, season, episode, params.Encode())
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/tv/%d/season/%d/episode/%d?%s", tmdbBaseURL, tmdbID, season, episode, params.Encode()))
 	if err != nil {
 		return nil, err
@@ -206,7 +210,16 @@ func (c *TVClient) EnrichSeries(series *models.Series) error {
 	series.Synopsis = details.Overview
 	series.Rating = details.VoteAverage
 	series.Popularity = details.Popularity
-	series.TVDBId = int64(details.ExternalIDs.TVDBID)
+
+	// ----------------------------------------------------
+	// -------------  To review !! ------------------------
+	// ----------------------------------------------------
+	// series.TVDBId = int64(details.ExternalIDs.TVDBID)
+	series.TVDBId = int64(details.ID)
+	// ----------------------------------------------------
+	// ----------------------------------------------------
+	// ----------------------------------------------------
+
 	series.IMDbId = details.ExternalIDs.IMDbID
 	series.SeasonCount = details.NumberOfSeasons
 	series.EpisodeCount = details.NumberOfEpisodes
@@ -251,6 +264,12 @@ func (c *TVClient) EnrichSeries(series *models.Series) error {
 			Role:   c.Character,
 			Avatar: avatar,
 		})
+	}
+
+	// Extract poster URL
+	if match.PosterPath != "" {
+		poster := tmdbImageBaseURL + match.PosterPath
+		series.Poster = &poster
 	}
 
 	return nil
