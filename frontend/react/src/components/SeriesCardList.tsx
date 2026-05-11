@@ -61,7 +61,10 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
             {series.status === 'complete' ? 'Complète' : series.status === 'ongoing' ? 'En cours' : 'Partielle'}
           </span>
         </div>
-        <div className={comStyles['card-list-badges']}>
+        <div className={comStyles['card-list-meta']}>
+          <span>{series.genres}</span>
+        </div>
+        {/* <div className={comStyles['card-list-badges']}>
           {series.seasons && series.seasons[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
             <span className={comStyles['badge-4k']}>4K</span>
           )}
@@ -76,7 +79,14 @@ export const SeriesCardList = ({ series, onClick }: SeriesCardListProps) => {
               {series.seasons?.[0]?.episodes?.length ?? 0} ep. manq.
             </span>
           )}
-        </div>
+        </div> */}
+      </div>
+
+      <div className={comStyles['card-list-synopsis']}>
+      {/* <div style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', paddingRight: '8px', maxWidth: '50%' }}> */}
+        <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5, margin: 0, textAlign: 'justify', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {series.synopsis}
+        </p>
       </div>
     </div>
   );
