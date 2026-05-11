@@ -318,7 +318,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                   {ep.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right' }}>
-                  {ep.fileSize ? `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go` : '—'}
+                  {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
                 </div>
                 <div
                   style={{
