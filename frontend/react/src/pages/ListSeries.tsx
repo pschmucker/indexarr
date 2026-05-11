@@ -87,7 +87,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   const loadedStats = useMemo(() => {
     const complete = series.filter((s) => s.status === 'complete').length;
     const episodes = series.reduce((sum, s) => sum + s.episodeCount, 0);
-    const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024 * 1024);
+    const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024);
 
     // -----------------------------------------------------------------------
     // -------------------------- To review !! -------------------------------
@@ -97,13 +97,14 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     // const ms = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + (season.missingEps > 0 ? season.episodes.length : 0), 0), 0);
     // const missingEpisodes = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + season.missingEps, 0), 0);
     // TODO fix it later
-    const missingEpisodes = 0; // For now we don't have missingEps data from API, so we'll just show 0
+    // For now we don't have missingEps data from API, so we'll just show the total from stats
+    const missingEpisodes = context?.stats?.missingEpisodes || 0;
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
 
     return { complete, total: series.length, episodes, diskSpace, missingEpisodes };
-  }, [series]);
+  }, [series, context?.stats]);
 
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
@@ -125,14 +126,14 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   };
 
   return (
-    <div style={{ padding: '16px 20px' }}>
+    <div style={{ paddingBottom: '16px' }}>
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '8px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 20px', background: 'var(--color-background-primary)', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginRight: '2px' }}>Filtres</span>
         
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"></circle></svg>}
             label="Statut"
             active={activeFilters.status.length > 0}
             count={activeFilters.status.length}
@@ -140,7 +141,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
         
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1.5" y="2.5" width="9" height="7" rx="1"></rect></svg>}
             label="Résolution"
             active={activeFilters.resolution.length > 0}
             count={activeFilters.resolution.length}
@@ -148,7 +149,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
           
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 6h2l2-4 2 8 2-4 1 0"></path></svg>}
             label="Codec"
             active={activeFilters.codec.length > 0}
             count={activeFilters.codec.length}
@@ -156,7 +157,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
           />
           
           <FilterChip
-            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
+            icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path></svg>}
             label="Audio"
             active={activeFilters.audio.length > 0}
             count={activeFilters.audio.length}
@@ -193,10 +194,10 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
-        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
-        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} total`, `${context?.stats?.totalEpisodes || 0} total`]} />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[`moy. par ep.`, `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
+        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
+        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes - loadedStats.missingEpisodes} / ${loadedStats.episodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
         <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
@@ -212,7 +213,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         </div>
       ) : view === 'grid' ? (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px', padding: '0 20px' }}>
             {series.map((s) => (
               <SeriesCard key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
             ))}
@@ -241,7 +242,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 20px' }}>
             {series.map((s) => (
               <SeriesCardList key={s.id} series={s} onClick={() => onSelectSeries(s.id)} />
             ))}
