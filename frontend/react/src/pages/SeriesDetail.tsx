@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Series } from '../types';
 import { apiClient } from '../api/client';
 import comStyles from '../styles/components.module.css';
+import { AppContext } from '../hooks/useAppContext';
 
 interface SeriesDetailProps {
   seriesId: number;
@@ -11,6 +12,18 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
   const [series, setSeries] = useState<Series | null>(null);
   const [currentSeason, setCurrentSeason] = useState(0);
   const [loading, setLoading] = useState(false);
+  const appContext = useContext(AppContext);
+
+  // Slugify function to create URL-friendly strings
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .normalize('NFD') // Normalize accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -65,8 +78,28 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
 
           {/* Info */}
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {series.title}
+            {typeof series.rating === 'number' && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: 'var(--color-badge-rating)',
+                color: 'var(--color-badge-rating-text)',
+                borderRadius: '99px',
+                fontSize: '12px',
+                fontWeight: 500,
+                padding: '2px 10px 2px 7px',
+                border: 'none',
+                lineHeight: 1,
+                minWidth: '36px',
+                height: '22px',
+              }}>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="var(--color-badge-rating-text)" style={{ marginRight: '2px', flexShrink: 0 }} aria-hidden="true"><path d="M6 1l1.4 3h3.1l-2.5 1.9 1 3L6 7.2l-3 1.7 1-3L1.5 4H4.6z"></path></svg>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{series.rating?.toFixed(1)}</span>
+              </span>
+            )}
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <span>
@@ -74,7 +107,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               </span>
               <span>·</span>
               <span>
-                {series.seasonCount} saisons · {series.episodeCount} épisodes
+                {series.seasonCount} saisons
+              </span>
+              <span>·</span>
+              <span>
+                {series.episodeCount} épisodes
               </span>
               <span>·</span>
               <span>{series.genres}</span>
@@ -87,7 +124,52 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
               {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
                 <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  4K UHD
+                  4K
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1080') && (
+                <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  1080p
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Dolby Vision
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  HDR10+
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  HDR10
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  TrueHD
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Dolby Digital Plus
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Atmos
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  DTS
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec && (
+                <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec}
                 </span>
               )}
             </div>
@@ -96,13 +178,18 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               {series.synopsis}
             </p>
 
+            {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-              <button style={{ background: '#1D9E75', color: 'white', border: 'none', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-                + Rechercher épisodes
-              </button>
-              <button style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>
-                Ouvrir dans Sonarr
-              </button>
+              {appContext?.config?.sonarrUrl && (
+                <a href={`${appContext.config.sonarrUrl}/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1D9E75', color: 'white', border: '0', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <img src="https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/sonarr-light.png" alt="Sonarr Light" style={{ width: '12px', height: '12px' }} />
+                  Sonarr
+                </a>
+              )}
+              <a href={`https://thetvdb.com/series/${slugify(series.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', border: '0.5px solid var(--color-border-tertiary)', padding: '6px 13px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <img src={appContext?.isDark ? 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-light.png' : 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/tvdb-dark.png'} alt="TVDB Light" style={{ width: '12px', height: '12px' }} />
+                TVDB
+              </a>
             </div>
           </div>
         </div>
@@ -172,11 +259,86 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     {Math.round(ep.duration / 60)} min · {ep.mediaInfo?.videoTracks?.[0]?.codec || 'N/A'}
                   </div>
                 </div>
+
+                <div style={{ flex: '1', fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                  {(ep.mediaInfo?.videoTracks ?? []).map((track, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '7px', translate: '-3px 0' }}>
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                        <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
+                        <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
+                      </svg>
+                      <span>{track.resolution || 'N/A'} · {track.fps || 'N/A'} fps · {track.bitrate || 'N/A'} · {track.colorSpace || 'N/A'}</span>
+                    </div>
+                  ))}
+                  {(ep.mediaInfo?.audioTracks ?? []).map((track, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ display: 'inline', verticalAlign: 'middle', opacity: 0.75 }}>
+                        <path d="M5 4L3 6H1.5v1.5H3l2 2zM8 4.5a2.5 2.5 0 010 3"></path>
+                      </svg>
+                      <span>{track.channels || 'N/A'} · {track.language || 'N/A'} · {track.bitrate || 'N/A'} · {track.sampleRate || 'N/A'}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
+                    <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      4K
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+                    <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      1080p
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                    <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Dolby Vision
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      HDR10+
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      HDR10
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                    <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      TrueHD
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                    <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Dolby Digital Plus
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                    <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Atmos
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                    <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      DTS
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.codec && (
+                    <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      {ep.mediaInfo.videoTracks?.[0]?.codec}
+                    </span>
+                  )}
+                </div>
+
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                   {ep.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', minWidth: '55px', textAlign: 'right' }}>
-                  {ep.fileSize ? `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go` : '—'}
+                  {ep.fileSize ? (ep.fileSize < 1024 * 1024 * 1024 ? `${(ep.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(ep.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
                 </div>
                 <div
                   style={{
