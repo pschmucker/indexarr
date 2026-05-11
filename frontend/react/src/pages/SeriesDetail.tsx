@@ -94,7 +94,11 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               </span>
               <span>·</span>
               <span>
-                {series.seasonCount} saisons · {series.episodeCount} épisodes
+                {series.seasonCount} saisons
+              </span>
+              <span>·</span>
+              <span>
+                {series.episodeCount} épisodes
               </span>
               <span>·</span>
               <span>{series.genres}</span>
