@@ -125,7 +125,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
     const available = movies.filter((m) => m.status === 'available').length;
     const diskSpace = movies.reduce((sum, m) => sum + (m.fileSize || 0), 0) / (1024 * 1024 * 1024);
     const fourK = movies.filter((m) => m.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840')).length;
-    const missing = movies.filter((m) => m.status === 'missing' || (m.fileSize || 0) === 0).length;
+    const missing = movies.filter((m) => m.status === 'missing').length;
     return { available, total: movies.length, diskSpace, fourK, missing };
   }, [movies]);
 
@@ -220,7 +220,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
         <StatCard label="Films" value={loadedStats.total} subLabels={[`${loadedStats.available} / ${loadedStats.total} disponibles`, `${context?.stats?.totalMovies || 0} total`]} />
         <StatCard label="4K UHD" value={loadedStats.fourK} subLabels={[`${loadedStats.total > 0 ? Math.round((loadedStats.fourK / loadedStats.total) * 100) : 0}%`, `${context?.stats?.fourKCount || 0} total (${Math.round(context?.stats?.fourKPercent || 0)}%)`]} />
         <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
-        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['fichiers manquants', `${context?.stats?.missingMovies || 0} total`]} />
+        <StatCard label="Problèmes" value={loadedStats.missing} subLabels={['films manquants', `${context?.stats?.missingMovies || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
 
