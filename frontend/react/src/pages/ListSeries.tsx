@@ -87,7 +87,7 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
   const loadedStats = useMemo(() => {
     const complete = series.filter((s) => s.status === 'complete').length;
     const episodes = series.reduce((sum, s) => sum + s.episodeCount, 0);
-    const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024 * 1024);
+    const diskSpace = series.reduce((sum, s) => sum + (s.fileSize || 0), 0) / (1024 * 1024 * 1024);
 
     // -----------------------------------------------------------------------
     // -------------------------- To review !! -------------------------------
@@ -97,13 +97,14 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     // const ms = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + (season.missingEps > 0 ? season.episodes.length : 0), 0), 0);
     // const missingEpisodes = series.reduce((sum, s) => sum + (s.seasons || []).reduce((seasonSum, season) => seasonSum + season.missingEps, 0), 0);
     // TODO fix it later
-    const missingEpisodes = 0; // For now we don't have missingEps data from API, so we'll just show 0
+    // For now we don't have missingEps data from API, so we'll just show the total from stats
+    const missingEpisodes = context?.stats?.missingEpisodes || 0;
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
 
     return { complete, total: series.length, episodes, diskSpace, missingEpisodes };
-  }, [series]);
+  }, [series, context?.stats]);
 
   const handleViewChange = (newView: ViewType) => {
     setView(newView);
@@ -194,9 +195,9 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', padding: '0 20px', marginBottom: '16px' }}>
-        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
-        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes} total`, `${context?.stats?.totalEpisodes || 0} total`]} />
-        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={[`moy. par ep.`, `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
+        <StatCard label="Séries" value={loadedStats.total} subLabels={[`${loadedStats.complete} / ${loadedStats.total} complètes`, `${context?.stats?.totalSeries || 0} total`]} />
+        <StatCard label="Épisodes" value={loadedStats.episodes} subLabels={[`${loadedStats.episodes - loadedStats.missingEpisodes} / ${loadedStats.episodes} disponibles`, `${context?.stats?.totalEpisodes || 0} total`]} />
+        <StatCard label="Espace" value={`${loadedStats.diskSpace.toFixed(1)} Go`} subLabels={['occupation disque', `${context?.stats?.diskSpaceGB?.toFixed(1) || 0} Go total`]} />
         <StatCard label="Problèmes" value={loadedStats.missingEpisodes || 0} subLabels={['épisodes manquants', `${context?.stats?.missingEpisodes || 0} total`]} />
         <ScanStatusCard onScanComplete={handleScanComplete} />
       </div>
