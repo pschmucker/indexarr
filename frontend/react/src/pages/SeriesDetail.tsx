@@ -87,7 +87,52 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
               {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
                 <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  4K UHD
+                  4K
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1080') && (
+                <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  1080p
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Dolby Vision
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  HDR10+
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  HDR10
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  TrueHD
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Dolby Digital Plus
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  Atmos
+                </span>
+              )}
+              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  DTS
+                </span>
+              )}
+              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec && (
+                <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                  {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec}
                 </span>
               )}
             </div>
@@ -172,6 +217,61 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                     {Math.round(ep.duration / 60)} min · {ep.mediaInfo?.videoTracks?.[0]?.codec || 'N/A'}
                   </div>
                 </div>
+
+                {/* Display badges: 4K, 1080p, Dolby Vision, HDR10+, HDR10, TrueHD, Dolby Digital Plus, Atmos, DTS, codec */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x2160') && (
+                    <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      4K
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.resolution.includes('x1080') && (
+                    <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      1080p
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                    <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Dolby Vision
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      HDR10+
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && (
+                    <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      HDR10
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                    <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      TrueHD
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                    <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Dolby Digital Plus
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                    <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      Atmos
+                    </span>
+                  )}
+                  {(ep.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                    <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      DTS
+                    </span>
+                  )}
+                  {ep.mediaInfo?.videoTracks?.[0]?.codec && (
+                    <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                      {ep.mediaInfo.videoTracks?.[0]?.codec}
+                    </span>
+                  )}
+                </div>
+
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                   {ep.status === 'missing' && <span className={comStyles['badge-missing']}>Manquant</span>}
                 </div>
