@@ -18,7 +18,7 @@ export const SeriesCard = ({ series, onClick }: SeriesCardProps) => {
     series.status === 'complete' ? '#1D9E75' : series.status === 'ongoing' ? '#EF9F27' : '#E24B4A';
 
   return (
-    <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }} onClick={onClick}>
+    <div className={comStyles['tv-show-card']} onClick={onClick}>
       <div
         style={{
           width: '100%',
