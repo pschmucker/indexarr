@@ -181,6 +181,17 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 	log.Printf("Scan completed: %d files processed, %d movies added, %d episodes added, %d errors",
 		result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
 
+	if len(result.Errors) > 0 {
+		// Log the first 100 errors for visibility
+		for i, err := range result.Errors {
+			if i >= 100 {
+				log.Printf("  - ... %d more lines", len(result.Errors)-100)
+				break
+			}
+			log.Printf("  - %s", err)
+		}
+	}
+
 	return result, nil
 }
 
