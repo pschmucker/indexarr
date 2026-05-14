@@ -26,10 +26,12 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
     { value: 'problem', label: 'Problème' },
   ],
   resolution: [
-    { value: '3840', label: '4K UHD (3840x2160)' },
-    { value: '1920', label: 'Full HD (1920x1080)' },
-    { value: '1280', label: 'HD (1280x720)' },
-    { value: '720', label: 'SD (720x480)' },
+    { value: '3840', label: '4K - Ultra HD (3840 x 2160)' },
+    { value: '1920', label: '1080p - Full HD (1920 x 1080)' },
+    { value: '1280', label: '720p - HD (1280 x 720)' },
+    { value: '854', label: '480p - SD (854 x 480)' },
+    { value: '640', label: '360p - SD (640 x 360)' },
+    { value: '426', label: '240p - SD (426 x 240)' },
   ],
   codec: [
     { value: 'AV1', label: 'AV1' },
@@ -47,6 +49,7 @@ const FILTER_OPTIONS: Record<FilterType, { value: string; label: string }[]> = {
     { value: 'DTS-HD MA', label: 'DTS-HD Master Audio' },
     { value: 'DTS', label: 'DTS' },
     { value: 'AAC', label: 'AAC' },
+    { value: 'MPEG', label: 'MPEG Audio' },
   ],
   hdr: [
     { value: 'Dolby Vision', label: 'Dolby Vision' },
