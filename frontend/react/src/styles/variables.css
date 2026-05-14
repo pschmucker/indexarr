@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light dark;
+
   /* Backgrounds */
   --color-background-primary: light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1));
   --color-background-secondary: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));

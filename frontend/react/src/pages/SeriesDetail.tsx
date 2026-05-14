@@ -67,12 +67,20 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 }}
               />
             ) : (
-              <div style={{ fontSize: '26px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
-                {series.title
-                  .split(' ')
-                  .map((w) => w[0])
-                  .join('')}
-              </div>
+              <>
+                <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                  {series.title
+                    .split(' ')
+                    .map((w) => w[0])
+                    .join('')}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
+                  {series.title}
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                  {`${series.yearStart || '?'} - ${series.yearEnd || '?'}`}
+                </div>
+              </>
             )}
           </div>
 
@@ -103,7 +111,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
             </h1>
             <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <span>
-                {series.yearStart}–{series.yearEnd}
+                {series.yearStart} – {series.yearEnd}
               </span>
               <span>·</span>
               <span>
@@ -117,7 +125,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               <span>{series.genres}</span>
               <span>·</span>
               <span style={{ color: '#1D9E75', fontWeight: 500 }}>
-                {series.status === 'complete' ? 'Complète' : 'Ongoing'}
+                {series.status === 'complete' ? 'Complète' : 'En cours'}
               </span>
             </div>
 
@@ -267,7 +275,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                         <rect x="2.5" y="5.5" width="11" height="7" rx="1.2" />
                         <path d="M2.5 5.5l1.5-3 2 3 1.5-3 2 3 1.5-3 2 3" />
                       </svg>
-                      <span>{track.resolution || 'N/A'} · {track.fps || 'N/A'} fps · {track.bitrate || 'N/A'} · {track.colorSpace || 'N/A'}</span>
+                      <span>{track.resolution || 'N/A'} · {track.bitrate || 'N/A'} · {track.fps || 'N/A'} fps · {track.colorSpace || 'N/A'}</span>
                     </div>
                   ))}
                   {(ep.mediaInfo?.audioTracks ?? []).map((track, idx) => (

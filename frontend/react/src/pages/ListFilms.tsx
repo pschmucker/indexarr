@@ -140,6 +140,7 @@ export const ListFilms = ({ onSelectMovie, searchQuery = '' }: ListFilmsProps) =
   const handleScanComplete = () => {
     // Refresh movies and stats after scan
     reset();
+    context?.refreshStats();
   };
 
   const handleFilterApply = (filterType: FilterType, values: string[]) => {
