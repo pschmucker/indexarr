@@ -68,7 +68,8 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           <span className={styles['nav-badge']}>{context?.stats?.totalSeries ?? 0}</span>
         </div>
 
-        <div className={styles['nav-item']}>
+        {/* Menus to be implemented in the future: */}
+        {/* <div className={styles['nav-item']}>
           <svg className={styles['nav-icon']} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="5" />
             <path d="M8 5v3l2 2" />
@@ -96,7 +97,7 @@ export const Sidebar = ({ activeNav, onNavClick }: SidebarProps) => {
           <span className={styles['nav-badge']} style={{ background: 'var(--color-badge-problem)', color: 'var(--color-badge-problem-text)', borderColor: 'var(--color-border-secondary)' }}>
             {context?.stats?.problemsCount ?? 0}
           </span>
-        </div>
+        </div> */}
       </nav>
 
       <div style={{ padding: '6px 18px', marginTop: 'auto' }}>
