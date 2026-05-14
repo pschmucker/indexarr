@@ -52,6 +52,9 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
               <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', padding: '0 6px' }}>
                 {movie.title}
               </div>
+              <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                {`${movie.year || ''}`}
+              </div>
             </>
           )}
         </div>

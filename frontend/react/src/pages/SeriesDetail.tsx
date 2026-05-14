@@ -67,12 +67,20 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
                 }}
               />
             ) : (
-              <div style={{ fontSize: '26px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
-                {series.title
-                  .split(' ')
-                  .map((w) => w[0])
-                  .join('')}
-              </div>
+              <>
+                <div style={{ fontSize: '30px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                  {series.title
+                    .split(' ')
+                    .map((w) => w[0])
+                    .join('')}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', opacity: 0.4, textAlign: 'center', maxWidth: '90%' }}>
+                  {series.title}
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)', opacity: 0.18 }}>
+                  {`${series.yearStart || '?'} - ${series.yearEnd || '?'}`}
+                </div>
+              </>
             )}
           </div>
 
