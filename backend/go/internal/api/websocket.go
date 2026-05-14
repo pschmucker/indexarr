@@ -17,12 +17,9 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		// Allow connections from localhost (development and production)
-		origin := r.Header.Get("Origin")
-		return origin == "http://localhost:3000" || // Vite dev server
-			origin == "http://localhost:5173" || // Vite dev server (alt port)
-			origin == "http://localhost:8787" || // Production nginx port
-			origin == "" // Allow non-browser clients
+		// Allow all origins (safe behind nginx reverse proxy)
+		// In production, nginx controls network-level access
+		return true
 	},
 }
 
