@@ -44,7 +44,7 @@ func main() {
 		// Start scheduler if interval is configured
 		if cfg.ScanInterval > 0 {
 			scheduler.Start()
-			log.Printf("Scheduler started with %d hour interval", cfg.ScanInterval)
+			log.Printf("⏱️  Scheduler started with %d hour interval", cfg.ScanInterval)
 		}
 	} else {
 		log.Println("⚠️  No MEDIA_LIBRARY_PATHS configured, scanning disabled")

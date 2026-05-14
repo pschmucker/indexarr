@@ -38,7 +38,6 @@ func (s *Scheduler) Start() {
 	s.mu.Unlock()
 
 	go s.run()
-	log.Printf("Scheduler started with interval: %v", s.interval)
 }
 
 // Stop stops the scheduler
