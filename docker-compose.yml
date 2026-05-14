@@ -14,6 +14,9 @@ services:
       # Media library paths (optional: comma-separated, adjust as needed)
       MEDIA_LIBRARY_PATHS: /data/movies,/data/tv-shows
 
+      # Comma-separated list of folder names to skip during scanning (optional)
+      SKIP_FOLDERS: ${SKIP_FOLDERS:-}
+
       # User/Group configuration (optional: match your media library owner)
       UID: ${UID:-1000}
       GID: ${GID:-1000}

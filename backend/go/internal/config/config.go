@@ -15,6 +15,7 @@ type Config struct {
 	SonarrURL         string
 	ScanInterval      int      // hours between scans (0 = disabled)
 	MediaLibraryPaths []string // directories to scan for media files
+	SkipFolders       []string // folder names to skip during scanning
 	MediainfoPath     string   // path to mediainfo binary
 	ScanTimeout       int      // timeout in seconds per file
 }
@@ -29,6 +30,7 @@ func Load() *Config {
 		SonarrURL:         getEnv("SONARR_URL", ""),
 		ScanInterval:      getEnvInt("SCAN_INTERVAL", 24),
 		MediaLibraryPaths: getEnvList("MEDIA_LIBRARY_PATHS", []string{}),
+		SkipFolders:       getEnvList("SKIP_FOLDERS", []string{}),
 		MediainfoPath:     getEnv("MEDIAINFO_PATH", "mediainfo"),
 		ScanTimeout:       getEnvInt("SCAN_TIMEOUT", 30),
 	}

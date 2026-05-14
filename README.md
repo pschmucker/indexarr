@@ -110,6 +110,7 @@ The easiest and recommended way to run Indexarr is with Docker Compose. The prov
 | `MOVIES_PATH` | - | Yes | Comma-separated paths to movies folder on the host (e.g., `/movies` or `/mnt/nas/movies,/external/movies`) |
 | `TV_SHOWS_PATH` | - | Yes | Comma-separated paths to tv-shows folder on the host (e.g., `/tv-shows` or `/mnt/nas/tv,/external/tv`) |
 | `MEDIA_LIBRARY_PATHS` | /data/movies,/data/tv-shows | No | Comma-separated paths to media on the guest |
+| `SKIP_FOLDERS` | - | No | Comma-separated list of folder names to skip during scanning |
 | `RADARR_URL` | http://radarr:7878 | No | Radarr URL |
 | `SONARR_URL` | http://sonarr:8989 | No | Sonarr URL |
 | `SCAN_INTERVAL` | 24 | No | Library scan interval in hours |
