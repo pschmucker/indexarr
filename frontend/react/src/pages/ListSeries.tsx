@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Series } from '../types';
 import { apiClient } from '../api/client';
 import { useInfiniteList } from '../hooks/useInfiniteList';
@@ -82,6 +82,35 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
     pageSize: 50,
     filters,
   });
+
+  // Infinite scroll sentinel ref
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !loading) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loading, loadMore]);
 
   // Calculate stats from loaded series
   const loadedStats = useMemo(() => {
@@ -219,25 +248,14 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
             ))}
           </div>
           {hasMore && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                style={{
-                  padding: '10px 24px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: loading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
-                  background: 'var(--color-background-secondary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  borderRadius: 'var(--border-radius-md)',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {loading ? 'Chargement...' : 'Charger plus'}
-              </button>
-            </div>
+            <>
+              <div ref={sentinelRef} style={{ height: '1px' }} />
+              {loading && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
+                  Chargement...
+                </div>
+              )}
+            </>
           )}
         </>
       ) : (
@@ -248,25 +266,14 @@ export const ListSeries = ({ onSelectSeries, searchQuery = '' }: ListSeriesProps
             ))}
           </div>
           {hasMore && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                style={{
-                  padding: '10px 24px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: loading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
-                  background: 'var(--color-background-secondary)',
-                  border: '0.5px solid var(--color-border-tertiary)',
-                  borderRadius: 'var(--border-radius-md)',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {loading ? 'Chargement...' : 'Charger plus'}
-              </button>
-            </div>
+            <>
+              <div ref={sentinelRef} style={{ height: '1px' }} />
+              {loading && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--color-text-tertiary)' }}>
+                  Chargement...
+                </div>
+              )}
+            </>
           )}
         </>
       )}
