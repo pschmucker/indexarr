@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"indexarr/internal/models"
 )
@@ -36,7 +37,8 @@ func SeedMockData(db *sql.DB) error {
 		}
 	}
 
-	fmt.Println("✅ Mock data seeded successfully")
+	log.Printf("✅ Mock data seeded successfully (%d movies and %d series)", len(movies), len(series))
+
 	return nil
 }
 
