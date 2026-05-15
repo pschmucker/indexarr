@@ -234,14 +234,54 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	return result, nil
 }
 
-// ScanMovie scans a single movie file (used for manual refresh via API)
+// ScanMovie scans a single movie (used for manual refresh via API)
 func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 	movie, err := repository.GetMovieByID(s.db, movieID)
 	if err != nil {
 		return nil, fmt.Errorf("movie not found: %w", err)
 	}
 
-	return s.ScanPaths([]string{movie.FilePath})
+	result, err := s.ScanPaths([]string{movie.FilePath})
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove movie if it was deleted from disk
+	if result.FilesProcessed == 0 {
+		log.Printf("Movie file not found during refresh, deleting movie: %s", movie.FilePath)
+		if err := repository.DeleteMovie(s.db, movieID); err != nil {
+			log.Printf("Failed to delete movie: %v", err)
+		}
+	} else {
+		// Extract media info again to update any changes (e.g. new audio tracks)
+		mediaInfo, fileSize, duration, err := s.extractor.Extract(movie.FilePath)
+		if err != nil {
+			log.Printf("Mediainfo extraction failed during refresh for %s: %v", movie.Title, err)
+		} else {
+			movie.MediaInfo = mediaInfo
+			movie.FileSize = fileSize
+			movie.Duration = duration / 60 // Convert seconds to minutes
+		}
+
+		// Fetch metadata from TMDB again to update any changes
+		if err := s.tmdb.EnrichMovie(movie); err != nil {
+			log.Printf("TMDB enrichment failed during refresh for %s: %v", movie.Title, err)
+		} else {
+			// Update movie with new metadata
+			if err := repository.UpdateMovie(s.db, movie); err != nil {
+				log.Printf("Failed to update movie during refresh: %v", err)
+			}
+			log.Printf("Movie refreshed: %s (%d)", movie.Title, movie.Year)
+			result.MoviesAdded = 1 // Count as "added" for refresh purposes
+			result.FilesProcessed = 1
+			result.FilesFound = 1
+			result.Errors = []string{}
+			result.EpisodesAdded = 0
+			result.MoviesAdded = 1
+		}
+	}
+
+	return result, nil
 }
 
 // processFile handles a single media file
@@ -275,7 +315,7 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInf
 		return fmt.Errorf("failed to check for existing movie: %w", err)
 	}
 	if exists {
-		log.Printf("Movie already exists for file: %s, skipping", filePath)
+		log.Printf("Movie already exists for file: %s", filePath)
 		return nil
 	}
 
