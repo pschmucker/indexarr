@@ -116,12 +116,21 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 				return nil // Continue walking
 			}
 
-			// Skip hidden directories
 			if d.IsDir() {
 				name := d.Name()
+
+				// Skip hidden directories
 				if strings.HasPrefix(name, ".") || strings.HasPrefix(name, "@") {
 					return fs.SkipDir
 				}
+
+				// Skip extra media folders
+				for _, extraFolder := range s.config.SkipFolders {
+					if strings.EqualFold(name, extraFolder) {
+						return fs.SkipDir
+					}
+				}
+
 				return nil
 			}
 
