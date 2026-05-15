@@ -378,6 +378,30 @@ func GetEpisodesForSeason(db *sql.DB, seriesID int64, seasonNum int) ([]models.E
 	return episodes, nil
 }
 
+// GetAllEpisodesForSeries returns all episodes for a series (across all seasons)
+func GetAllEpisodesForSeries(db *sql.DB, seriesID int64) ([]models.Episode, error) {
+	rows, err := db.Query(`SELECT id, series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added FROM episodes WHERE series_id=? ORDER BY season_num, episode_num`, seriesID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var episodes []models.Episode
+	for rows.Next() {
+		var e models.Episode
+		err := rows.Scan(&e.ID, &e.SeriesID, &e.SeasonNum, &e.EpisodeNum, &e.Title, &e.Duration, &e.Status, &e.FileSize, &e.FilePath, &e.DateAdded)
+		if err != nil {
+			return nil, err
+		}
+		if e.Status == "available" {
+			e.MediaInfo, _ = GetMediaInfoForEpisode(db, e.ID)
+		}
+		episodes = append(episodes, e)
+	}
+
+	return episodes, nil
+}
+
 func GetMediaInfoForEpisode(db *sql.DB, episodeID int64) (*models.MediaInfo, error) {
 	mi := &models.MediaInfo{}
 

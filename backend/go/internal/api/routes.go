@@ -57,6 +57,7 @@ func SetupRoutes(db *sql.DB, cfg *config.Config, scheduler *services.Scheduler, 
 			r.Post("/scan/stop", StopScan(scheduler))
 
 			r.Post("/movies/{id}/refresh", RefreshMovie(scheduler))
+			r.Post("/series/{id}/refresh", RefreshSeries(scheduler))
 
 			// WebSocket endpoint for real-time scan updates
 			if broadcaster != nil {

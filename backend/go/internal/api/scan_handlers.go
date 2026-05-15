@@ -70,3 +70,25 @@ func RefreshMovie(scheduler *services.Scheduler) http.HandlerFunc {
 		})
 	}
 }
+
+func RefreshSeries(scheduler *services.Scheduler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil {
+			respondError(w, 400, "Invalid series ID")
+			return
+		}
+
+		result, err := scheduler.TriggerSeriesScan(id)
+		if err != nil {
+			respondError(w, 500, "Failed to refresh series: "+err.Error())
+			return
+		}
+
+		respond(w, map[string]interface{}{
+			"success": true,
+			"message": "Series refresh started",
+			"result":  result,
+		})
+	}
+}

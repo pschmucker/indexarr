@@ -118,3 +118,8 @@ func (s *Scheduler) StopCurrentScan() {
 func (s *Scheduler) TriggerMovieScan(id int64) (*models.ScanResult, error) {
 	return s.scanner.ScanMovie(id)
 }
+
+// TriggerSeriesScan triggers a scan for a specific series to update its metadata
+func (s *Scheduler) TriggerSeriesScan(id int64) (*models.ScanResult, error) {
+	return s.scanner.ScanSeries(id)
+}
