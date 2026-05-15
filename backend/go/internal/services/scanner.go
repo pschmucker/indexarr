@@ -60,6 +60,11 @@ func (s *Scanner) Stop() {
 
 // Scan performs a full library scan
 func (s *Scanner) Scan() (*models.ScanResult, error) {
+	return s.ScanPaths(s.config.MediaLibraryPaths)
+}
+
+// ScanPaths performs a scan on specified paths (used for manual scans via API)
+func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	log.Println("Starting scan")
 	start := time.Now()
 
@@ -94,7 +99,7 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 
 	// Collect all media files
 	var files []string
-	for _, libPath := range s.config.MediaLibraryPaths {
+	for _, libPath := range paths {
 		if libPath == "" {
 			continue
 		}
