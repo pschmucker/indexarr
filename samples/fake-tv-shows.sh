@@ -237,3 +237,9 @@ touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E07 - Wishful Thinkin
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E08 - The Elegance Theory - WEBRip-1080p x264 EAC3-6.0.mkv"
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E09 - Pillow Talk - WEBRip-1080p x264 EAC3-6.0.mkv"
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E10 - A Family Tradition - WEBRip-1080p x264 EAC3-6.0.mkv"
+
+
+## Alien Earth
+mkdir -p "Alien Earth/Season 1"
+touch "Alien Earth/Season 1/Alien - Earth - S01E01 - Neverland WEBDL-2160p.mkv"
+touch "Alien Earth/Season 1/Alien - Earth - S01E02 - Mr. October WEBDL-2160p.mkv"
