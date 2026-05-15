@@ -3,6 +3,60 @@
 
 PRAGMA foreign_keys = OFF;
 
+
+-- seasons
+ALTER TABLE seasons RENAME TO seasons_old;
+
+CREATE TABLE seasons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  series_id INTEGER NOT NULL,
+  number INTEGER NOT NULL,
+  file_size INTEGER,
+  FOREIGN KEY(series_id) REFERENCES series(id) ON DELETE CASCADE,
+  UNIQUE(series_id, number)
+);
+
+INSERT INTO seasons (
+  id, series_id, number, file_size
+)
+SELECT
+  id, series_id, number, file_size
+FROM seasons_old;
+
+DROP TABLE seasons_old;
+
+
+-- episodes
+ALTER TABLE episodes RENAME TO episodes_old;
+
+CREATE TABLE episodes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  series_id INTEGER NOT NULL,
+  season_num INTEGER NOT NULL,
+  episode_num INTEGER NOT NULL,
+  title TEXT,
+  duration INTEGER,
+  status TEXT DEFAULT 'available',
+  file_size INTEGER,
+  file_path TEXT,
+  date_added TEXT,
+  last_scanned TEXT,
+  FOREIGN KEY(series_id) REFERENCES series(id) ON DELETE CASCADE,
+  UNIQUE(series_id, season_num, episode_num)
+);
+
+INSERT INTO episodes (
+  id, series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned
+)
+SELECT
+  id, series_id, season_num, episode_num, title, duration, status, file_size, file_path, date_added, last_scanned
+FROM episodes_old;
+
+DROP TABLE episodes_old;
+
+CREATE INDEX IF NOT EXISTS idx_episodes_series ON episodes(series_id);
+
+
 -- video_tracks
 ALTER TABLE video_tracks RENAME TO video_tracks_old;
 
