@@ -60,6 +60,9 @@ func (s *Scanner) Stop() {
 
 // Scan performs a full library scan
 func (s *Scanner) Scan() (*models.ScanResult, error) {
+	log.Println("Starting scan")
+	start := time.Now()
+
 	s.mu.Lock()
 	if s.running {
 		s.mu.Unlock()
@@ -208,8 +211,9 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
 	}
 
-	log.Printf("Scan completed: %d files processed, %d movies added, %d episodes added, %d errors",
-		result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+	duration := time.Since(start)
+	log.Printf("Scan completed in %v - %d files processed, %d movies added, %d episodes added, %d errors",
+		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
 
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
