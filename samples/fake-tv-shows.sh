@@ -84,29 +84,56 @@ touch "Dune Prophecy (2024)/Dune Prophecy (2024) S01E10 - The Prophecy Fulfilled
 
 
 ## Game of Thrones
-mkdir -p "Game of Thrones (2011)"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E01 - Winter Is Coming.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E02 - The Kingsroad.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E03 - Lord Snow.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E04 - Cripples, Bastards, and Broken Things.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E05 - The Wolf and the Lion.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E06 - A Golden Crown.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E07 - You Win or You Die.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E08 - The Pointy End.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E09 - Baelor.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S01E10 - Fire and Blood.mkv"
+mkdir -p "Game of Thrones (2011)/Season 1"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E01 - Winter Is Coming.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E02 - The Kingsroad.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E03 - Lord Snow.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E04 - Cripples, Bastards, and Broken Things.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E05 - The Wolf and the Lion.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E06 - A Golden Crown.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E07 - You Win or You Die.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E08 - The Pointy End.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E09 - Baelor.mkv"
+touch "Game of Thrones (2011)/Season 1/Game of Thrones (2011) S01E10 - Fire and Blood.mkv"
 
-### Other seasons
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E01 - The North Remembers.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E02 - The Night Lands.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E03 - What Is Dead May Never Die.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E04 - Garden of Bones.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E05 - The Ghost of Harrenhal.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E06 - The Old Gods and the New.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E07 - A Mandatory Return.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E08 - The Prince of Winterfell.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E09 - Blackwater.mkv"
-touch "Game of Thrones (2011)/Game of Thrones (2011) S02E10 - Valar Morghulis.mkv"
+### Season 2
+mkdir -p "Game of Thrones (2011)/Season 2"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E01 - The North Remembers.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E02 - The Night Lands.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E03 - What Is Dead May Never Die.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E04 - Garden of Bones.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E05 - The Ghost of Harrenhal.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E06 - The Old Gods and the New.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E07 - A Mandatory Return.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E08 - The Prince of Winterfell.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E09 - Blackwater.mkv"
+touch "Game of Thrones (2011)/Season 2/Game of Thrones (2011) S02E10 - Valar Morghulis.mkv"
+
+### Season 3
+mkdir -p "Game of Thrones (2011)/Season 3"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E01 - Valar Dohaeris.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E02 - Dark Wings, Dark Words.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E03 - Walk of Punishment.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E04 - And Now His Watch Is Ended.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E05 - Kissed by Fire.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E06 - The Climb.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E07 - The Bear and the Maiden Fair.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E08 - Second Sons.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E09 - The Rains of Castamere.mkv"
+touch "Game of Thrones (2011)/Season 3/Game of Thrones (2011) S03E10 - Mhysa.mkv"
+
+### Season 4
+mkdir -p "Game of Thrones (2011)/Season 4"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E01 - Two Swords.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E02 - The Lion and the Rose.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E03 - Breaker of Chains.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E04 - Oathkeeper.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E05 - First of His Name.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E06 - The Laws of Gods and Men.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E07 - Mockingbird.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E08 - The Mountain and the Viper.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E09 - The Watchers on the Wall.mkv"
+touch "Game of Thrones (2011)/Season 4/Game of Thrones (2011) S04E10 - The Children.mkv"
 
 
 ## Supernatural
@@ -237,3 +264,9 @@ touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E07 - Wishful Thinkin
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E08 - The Elegance Theory - WEBRip-1080p x264 EAC3-6.0.mkv"
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E09 - Pillow Talk - WEBRip-1080p x264 EAC3-6.0.mkv"
 touch "Money Heist (2017)/Season 5/Money Heist (2017) - S05E10 - A Family Tradition - WEBRip-1080p x264 EAC3-6.0.mkv"
+
+
+## Alien Earth
+mkdir -p "Alien Earth/Season 1"
+touch "Alien Earth/Season 1/Alien - Earth - S01E01 - Neverland WEBDL-2160p.mkv"
+touch "Alien Earth/Season 1/Alien - Earth - S01E02 - Mr. October WEBDL-2160p.mkv"

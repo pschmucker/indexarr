@@ -115,6 +115,93 @@ func InsertMovie(db *sql.DB, movie *models.Movie) (int64, error) {
 	return movieID, err
 }
 
+// UpdateMovie updates an existing movie and its related data
+func UpdateMovie(db *sql.DB, movie *models.Movie) error {
+	return retryOnLock(func() error {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		// Update movie
+		_, err = tx.Exec(`
+			UPDATE movies
+			SET title = ?, year = ?, duration = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, file_path = ?, container = ?, last_scanned = ?, tmdb_id = ?, imdb_id = ?, poster = ?
+			WHERE id = ?
+		`, movie.Title, movie.Year, movie.Duration, movie.Synopsis, movie.Genres, movie.Rating, movie.Popularity,
+			movie.Status, movie.FileSize, movie.FilePath, movie.Container, time.Now().Format(time.RFC3339),
+			movie.TMDBId, movie.IMDbId, movie.Poster, movie.ID)
+		if err != nil {
+			return err
+		}
+
+		// Delete existing cast and media info (simpler than diffing)
+		_, err = tx.Exec(`DELETE FROM cast WHERE movie_id = ?`, movie.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM video_tracks WHERE movie_id = ?`, movie.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM audio_tracks WHERE movie_id = ?`, movie.ID)
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec(`DELETE FROM subtitle_tracks WHERE movie_id = ?`, movie.ID)
+		if err != nil {
+			return err
+		}
+
+		// Re-insert cast
+		for _, cast := range movie.Cast {
+			_, err := tx.Exec(`
+				INSERT INTO cast (movie_id, name, role, avatar)
+				VALUES (?, ?, ?, ?)
+			`, movie.ID, cast.Name, cast.Role, cast.Avatar)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Re-insert media info
+		if movie.MediaInfo != nil {
+			for _, vt := range movie.MediaInfo.VideoTracks {
+				_, err := tx.Exec(`
+					INSERT INTO video_tracks (movie_id, codec, resolution, fps, bitrate, hdr, color_space)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				`, movie.ID, vt.Codec, vt.Resolution, vt.FPS, vt.Bitrate, vt.HDR, vt.ColorSpace)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, at := range movie.MediaInfo.AudioTracks {
+				_, err := tx.Exec(`
+					INSERT INTO audio_tracks (movie_id, codec, channels, language, sample_rate, bitrate)
+					VALUES (?, ?, ?, ?, ?, ?)
+				`, movie.ID, at.Codec, at.Channels, at.Language, at.SampleRate, at.Bitrate)
+				if err != nil {
+					return err
+				}
+			}
+
+			for _, st := range movie.MediaInfo.SubtitleTracks {
+				_, err := tx.Exec(`
+					INSERT INTO subtitle_tracks (movie_id, language, format)
+					VALUES (?, ?, ?)
+				`, movie.ID, st.Language, st.Format)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return tx.Commit()
+	})
+}
+
 // InsertEpisode inserts an episode with its media info
 func InsertEpisode(db *sql.DB, episode *models.Episode) (int64, error) {
 	var episodeID int64
@@ -462,4 +549,79 @@ func PurgeDatabase(db *sql.DB) error {
 	}
 
 	return tx.Commit()
+}
+
+// DeleteMovie deletes a movie by ID
+func DeleteMovie(db *sql.DB, movieID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM movies WHERE id = ?`, movieID)
+		return err
+	})
+}
+
+// DeleteEpisode deletes an episode by ID (cascade constraints handle tracks)
+func DeleteEpisode(db *sql.DB, episodeID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM episodes WHERE id = ?`, episodeID)
+		return err
+	})
+}
+
+// DeleteSeries deletes a series by ID (cascade constraints handle episodes, seasons, cast, and tracks)
+func DeleteSeries(db *sql.DB, seriesID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`DELETE FROM series WHERE id = ?`, seriesID)
+		return err
+	})
+}
+
+func DeleteEmptySeasons(db *sql.DB, seriesID int64) error {
+	return retryOnLock(func() error {
+		_, err := db.Exec(`
+			DELETE FROM seasons
+			WHERE series_id = ? AND number NOT IN (SELECT DISTINCT season_num FROM episodes WHERE series_id = ?)
+		`, seriesID, seriesID)
+		return err
+	})
+}
+
+// UpdateSeries updates an existing series and its cast
+func UpdateSeries(db *sql.DB, series *models.Series) error {
+	return retryOnLock(func() error {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		// Update series
+		_, err = tx.Exec(`
+			UPDATE series
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tvdb_id = ?, imdb_id = ?, poster = ?
+			WHERE id = ?
+		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
+			series.Status, series.FileSize, series.TVDBId, series.IMDbId, series.Poster, series.ID)
+		if err != nil {
+			return err
+		}
+
+		// Delete existing cast and re-insert (simpler than diffing)
+		_, err = tx.Exec(`DELETE FROM cast WHERE series_id = ?`, series.ID)
+		if err != nil {
+			return err
+		}
+
+		// Re-insert cast
+		for _, cast := range series.Cast {
+			_, err := tx.Exec(`
+				INSERT INTO cast (series_id, name, role, avatar)
+				VALUES (?, ?, ?, ?)
+			`, series.ID, cast.Name, cast.Role, cast.Avatar)
+			if err != nil {
+				return err
+			}
+		}
+
+		return tx.Commit()
+	})
 }

@@ -11,22 +11,37 @@ interface MovieDetailProps {
 export const MovieDetail = ({ movieId }: MovieDetailProps) => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const appContext = useContext(AppContext);
 
-  useEffect(() => {
-    const fetchMovie = async () => {
-      setLoading(true);
-      try {
-        const data = await apiClient.getMovie(movieId);
-        setMovie(data);
-      } catch (error) {
-        console.error('Failed to fetch movie:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch movie function, used for both initial load and refresh
+  const fetchMovie = async () => {
+    setLoading(true);
+    try {
+      const data = await apiClient.getMovie(movieId);
+      setMovie(data);
+    } catch (error) {
+      console.error('Failed to fetch movie:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Refresh handler for menu
+  const handleRefresh = async () => {
+    const response = await apiClient.refreshMovie(movieId);
+    
+    if (response.result?.filesFound) {
+      fetchMovie();
+    }
+    else {
+      window.location.reload();
+    }
+  };
+
+  useEffect(() => {
     fetchMovie();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movieId]);
 
   if (loading) return <div style={{ padding: '20px' }}>Chargement...</div>;
@@ -83,6 +98,80 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                 <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-badge-rating-text)', lineHeight: 1 }}>{movie.rating?.toFixed(1)}</span>
               </span>
             )}
+
+            {/* Popup contextual menu */}
+            <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+              <button
+                style={{
+                  background: 'var(--color-background-primary)',
+                  border: '0.5px solid var(--color-border-tertiary)',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  position: 'relative',
+                }}
+                aria-label="Menu"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen((open) => !open);
+                }}
+                onBlur={() => {
+                  setTimeout(() => setMenuOpen(false), 120);
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ verticalAlign: 'middle' }}>
+                  <line x1="2" y1="4" x2="14" y2="4" />
+                  <line x1="2" y1="8" x2="14" y2="8" />
+                  <line x1="2" y1="12" x2="14" y2="12" />
+                </svg>
+              </button>
+              {menuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '36px',
+                    right: 0,
+                    background: 'var(--color-background-secondary)',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                    zIndex: 10,
+                    minWidth: '120px',
+                  }}
+                  tabIndex={-1}
+                >
+                  <button
+                    style={{
+                      width: '100%',
+                      background: 'none',
+                      border: 'none',
+                      padding: '10px 16px',
+                      textAlign: 'left',
+                      fontSize: '13px',
+                      color: 'var(--color-text-primary)',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleRefresh();
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginRight: 7, verticalAlign: 'center' }}>
+                      <path d="M2.5 8A5.5 5.5 0 018 2.5c1.5 0 2.9.6 3.9 1.6M13.5 8A5.5 5.5 0 018 13.5c-1.5 0-2.9-.6-3.9-1.6" />
+                      <path d="M12 2.5v2.5H9.5" />
+                      <path d="M4 13.5v-2.5H6.5" />
+                    </svg>
+                    Rafraîchir
+                  </button>
+                </div>
+              )}
+            </div>
           </h1>
           <div style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <span>{movie.year}</span>
@@ -227,7 +316,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
       )}
 
       {/* MediaInfo Table */}
-      {(movie.mediaInfo?.videoTracks || movie.mediaInfo?.audioTracks || movie.mediaInfo?.subtitleTracks) && (
+      {movie.mediaInfo && (
         <div style={{ padding: '0 24px' }}>
           <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '12px' }}>
             Métadonnées du fichier
@@ -256,7 +345,7 @@ export const MovieDetail = ({ movieId }: MovieDetailProps) => {
                     Taille
                   </td>
                   <td style={{ fontSize: '11px', color: 'var(--color-text-secondary)', padding: '7px 8px' }}>
-                  {movie.fileSize ? (movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`) : '—'}
+                  {movie.fileSize < 1024 * 1024 * 1024 ? `${(movie.fileSize / 1024 / 1024).toFixed(1)} Mo` : `${(movie.fileSize / 1024 / 1024 / 1024).toFixed(1)} Go`}
                   </td>
                 </tr>
               </tbody>

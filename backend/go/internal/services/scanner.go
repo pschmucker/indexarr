@@ -60,6 +60,14 @@ func (s *Scanner) Stop() {
 
 // Scan performs a full library scan
 func (s *Scanner) Scan() (*models.ScanResult, error) {
+	return s.ScanPaths(s.config.MediaLibraryPaths)
+}
+
+// ScanPaths performs a scan on specified paths (used for manual scans via API)
+func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
+	log.Println("Starting scan")
+	start := time.Now()
+
 	s.mu.Lock()
 	if s.running {
 		s.mu.Unlock()
@@ -91,7 +99,7 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 
 	// Collect all media files
 	var files []string
-	for _, libPath := range s.config.MediaLibraryPaths {
+	for _, libPath := range paths {
 		if libPath == "" {
 			continue
 		}
@@ -208,8 +216,9 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 		s.broadcaster.BroadcastScanComplete(result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
 	}
 
-	log.Printf("Scan completed: %d files processed, %d movies added, %d episodes added, %d errors",
-		result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
+	duration := time.Since(start)
+	log.Printf("Scan completed in %v - %d files processed, %d movies added, %d episodes added, %d errors",
+		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded, len(result.Errors))
 
 	if len(result.Errors) > 0 {
 		// Log the first 100 errors for visibility
@@ -223,6 +232,238 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 	}
 
 	return result, nil
+}
+
+// ScanMovie scans a single movie (used for manual refresh via API)
+func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
+	movie, err := repository.GetMovieByID(s.db, movieID)
+	if err != nil {
+		return nil, fmt.Errorf("movie not found: %w", err)
+	}
+
+	result, err := s.ScanPaths([]string{movie.FilePath})
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove movie if it was deleted from disk
+	if result.FilesProcessed == 0 {
+		log.Printf("Movie file not found during refresh, deleting movie: %s", movie.FilePath)
+		if err := repository.DeleteMovie(s.db, movieID); err != nil {
+			log.Printf("Failed to delete movie: %v", err)
+		}
+	} else {
+		// Extract media info again to update any changes (e.g. new audio tracks)
+		mediaInfo, fileSize, duration, err := s.extractor.Extract(movie.FilePath)
+		if err != nil {
+			log.Printf("Mediainfo extraction failed during refresh for %s: %v", movie.Title, err)
+		} else {
+			movie.MediaInfo = mediaInfo
+			movie.FileSize = fileSize
+			movie.Duration = duration / 60 // Convert seconds to minutes
+		}
+
+		// Fetch metadata from TMDB again to update any changes
+		if err := s.tmdb.EnrichMovie(movie); err != nil {
+			log.Printf("TMDB enrichment failed during refresh for %s: %v", movie.Title, err)
+		} else {
+			// Update movie with new metadata
+			if err := repository.UpdateMovie(s.db, movie); err != nil {
+				log.Printf("Failed to update movie during refresh: %v", err)
+			}
+			log.Printf("Movie refreshed: %s (%d)", movie.Title, movie.Year)
+			result.MoviesAdded = 1 // Count as "added" for refresh purposes
+			result.FilesProcessed = 1
+			result.FilesFound = 1
+			result.Errors = []string{}
+			result.EpisodesAdded = 0
+			result.MoviesAdded = 1
+		}
+	}
+
+	return result, nil
+}
+
+// ScanSeries scans a single series (used for manual refresh via API)
+func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
+	log.Printf("Starting series refresh for ID: %d", seriesID)
+	start := time.Now()
+
+	result := &models.ScanResult{
+		Errors: []string{},
+	}
+
+	// Step 1: Fetch series from database
+	series, err := repository.GetSeriesByID(s.db, seriesID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch series: %w", err)
+	}
+	if series == nil {
+		return nil, fmt.Errorf("series not found with ID: %d", seriesID)
+	}
+
+	log.Printf("Found series: %s", series.Title)
+
+	// Step 2: Fetch all episodes to determine folders to scan
+	episodes, err := repository.GetAllEpisodesForSeries(s.db, seriesID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch episodes: %w", err)
+	}
+
+	// Extract unique folder paths from existing episodes
+	folderPaths := s.findSeriesFolderPaths(episodes)
+	log.Printf("Will scan %d folder(s) for series: %v", len(folderPaths), folderPaths)
+
+	// Step 3: Scan folder paths to detect new episodes
+	scanResult, err := s.ScanPaths(folderPaths)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan series folders: %w", err)
+	}
+
+	result.FilesFound = scanResult.FilesFound
+
+	// Step 4 & 5: Check for missing episodes and delete them from database
+	episodesToDelete := []int64{}
+	for _, episode := range episodes {
+		// Check if file still exists
+		if _, err := os.Stat(episode.FilePath); os.IsNotExist(err) {
+			log.Printf("Episode file missing: %s (S%02dE%02d), marking for removal", episode.FilePath, episode.SeasonNum, episode.EpisodeNum)
+			episodesToDelete = append(episodesToDelete, episode.ID)
+		}
+	}
+
+	// Delete missing episodes
+	for _, episodeID := range episodesToDelete {
+		if err := repository.DeleteEpisode(s.db, episodeID); err != nil {
+			errMsg := fmt.Sprintf("Failed to remove missing episode %d: %v", episodeID, err)
+			log.Printf("%s", errMsg)
+			result.Errors = append(result.Errors, errMsg)
+		}
+	}
+
+	// Delete seasons that have no episodes left
+	if err := repository.DeleteEmptySeasons(s.db, seriesID); err != nil {
+		log.Printf("Failed to delete empty seasons: %v", err)
+	}
+
+	// Step 6: Check if series folder is completely missing
+	if scanResult.FilesFound == 0 && len(episodesToDelete) == len(episodes) {
+		log.Printf("All episodes missing from disk, deleting series: %s", series.Title)
+		if err := repository.DeleteSeries(s.db, seriesID); err != nil {
+			errMsg := fmt.Sprintf("Failed to delete series: %v", err)
+			log.Printf("%s", errMsg)
+			result.Errors = append(result.Errors, errMsg)
+		}
+		return result, nil
+	}
+
+	// Step 7: Extract media info for each episode again to catch any changes
+	for _, episode := range episodes {
+		mediaInfo, fileSize, duration, err := s.extractor.Extract(episode.FilePath)
+		if err != nil {
+			log.Printf("Mediainfo extraction failed for %s: %v", episode.FilePath, err)
+			// Continue with minimal info
+			mediaInfo = &models.MediaInfo{
+				VideoTracks:    []models.VideoTrack{},
+				AudioTracks:    []models.AudioTrack{},
+				SubtitleTracks: []models.SubtitleTrack{},
+			}
+		}
+
+		episode.MediaInfo = mediaInfo
+		episode.FileSize = fileSize
+		episode.Duration = duration
+
+		// Update episode in database
+		if err := repository.UpdateEpisode(s.db, &episode); err != nil {
+			log.Printf("Failed to update episode during refresh: %v", err)
+			result.Errors = append(result.Errors, fmt.Sprintf("Failed to update episode S%02dE%02d: %v", episode.SeasonNum, episode.EpisodeNum, err))
+		}
+	}
+
+	// Re-enrich series metadata from TVDB
+	if err := s.tv.EnrichSeries(series); err != nil {
+		log.Printf("TVDB enrichment failed during refresh for %s: %v", series.Title, err)
+	}
+
+	// Update series in database
+	if err := repository.UpdateSeries(s.db, series); err != nil {
+		log.Printf("Failed to update series during refresh: %v", err)
+		result.Errors = append(result.Errors, fmt.Sprintf("Failed to update series: %v", err))
+	}
+
+	// Recalculate series counts
+	if err := repository.UpdateSeriesCounts(s.db, seriesID); err != nil {
+		log.Printf("Failed to update series counts: %v", err)
+		result.Errors = append(result.Errors, fmt.Sprintf("Failed to update series counts: %v", err))
+	}
+
+	result.FilesProcessed = scanResult.FilesProcessed
+	result.EpisodesAdded = scanResult.EpisodesAdded
+	result.MoviesAdded = 0 // No movies in series refresh
+
+	// Merge any errors from the scan
+	result.Errors = append(result.Errors, scanResult.Errors...)
+
+	duration := time.Since(start)
+	log.Printf("Series refresh completed in %v - %d files processed, %d episodes added, %d episodes deleted, %d errors",
+		duration.Round(time.Second), result.FilesProcessed, result.EpisodesAdded, len(episodesToDelete), len(result.Errors))
+
+	return result, nil
+}
+
+// findSeriesFolderPaths extracts unique parent directory paths from a list of episodes
+// This supports series that may be split across multiple folders
+func (s *Scanner) findSeriesFolderPaths(episodes []models.Episode) []string {
+	folderMap := make(map[string]bool)
+
+	for _, episode := range episodes {
+		dir := filepath.Dir(episode.FilePath)
+		folderMap[dir] = true
+	}
+
+	folders := make([]string, 0, len(folderMap))
+	for folder := range folderMap {
+		folders = append(folders, folder)
+	}
+
+	// Find common parent folder which does not belong to any media library path to avoid scanning the entire library if series episodes are stored in different folders. This is a common edge case for users who have their TV shows organized in multiple folders (e.g. by genre, by quality, etc.) but still want to be able to refresh the entire series metadata with one click.
+	commonParent := findCommonParentFolder(folders)
+	if commonParent != "" && !s.isLibraryPath(commonParent) {
+		log.Printf("Series episodes are in multiple folders, using common parent folder for scan: %s", commonParent)
+		return []string{commonParent}
+	}
+
+	return folders
+}
+
+// findCommonParentFolder takes a list of folder paths and returns the common parent folder if it exists, or an empty string if there is no common parent
+func findCommonParentFolder(folders []string) string {
+	if len(folders) == 0 {
+		return ""
+	}
+
+	commonParent := folders[0]
+	for _, folder := range folders[1:] {
+		for !strings.HasPrefix(folder, commonParent) {
+			commonParent = filepath.Dir(commonParent)
+			if commonParent == "." || commonParent == "/" {
+				return ""
+			}
+		}
+	}
+
+	return commonParent
+}
+
+// isLibraryPath checks if a given path is one of the configured media library paths
+func (s *Scanner) isLibraryPath(path string) bool {
+	for _, libPath := range s.config.MediaLibraryPaths {
+		if strings.EqualFold(filepath.Clean(libPath), filepath.Clean(path)) {
+			return true
+		}
+	}
+	return false
 }
 
 // processFile handles a single media file
@@ -256,7 +497,7 @@ func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInf
 		return fmt.Errorf("failed to check for existing movie: %w", err)
 	}
 	if exists {
-		log.Printf("Movie already exists for file: %s, skipping", filePath)
+		log.Printf("Movie already exists for file: %s", filePath)
 		return nil
 	}
 

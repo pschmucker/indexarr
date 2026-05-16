@@ -88,18 +88,15 @@ func (s *Scheduler) run() {
 }
 
 func (s *Scheduler) runScan() {
-	log.Println("Scheduler: Starting scheduled scan")
-	start := time.Now()
+	log.Println("Scheduler: Run scheduled scan")
 
-	result, err := s.scanner.Scan()
+	_, err := s.scanner.Scan()
 	if err != nil {
 		log.Printf("Scheduler: Scan failed: %v", err)
 		return
 	}
 
-	duration := time.Since(start)
-	log.Printf("Scheduler: Scan completed in %v - %d files, %d movies, %d episodes",
-		duration.Round(time.Second), result.FilesProcessed, result.MoviesAdded, result.EpisodesAdded)
+	log.Printf("Scheduler: Scheduled scan completed")
 }
 
 // TriggerScan manually triggers a scan (used by API)
@@ -115,4 +112,14 @@ func (s *Scheduler) GetScanStatus() (*models.ScanStatus, error) {
 // StopCurrentScan stops any running scan
 func (s *Scheduler) StopCurrentScan() {
 	s.scanner.Stop()
+}
+
+// TriggerMovieScan triggers a scan for a specific movie to update its metadata
+func (s *Scheduler) TriggerMovieScan(id int64) (*models.ScanResult, error) {
+	return s.scanner.ScanMovie(id)
+}
+
+// TriggerSeriesScan triggers a scan for a specific series to update its metadata
+func (s *Scheduler) TriggerSeriesScan(id int64) (*models.ScanResult, error) {
+	return s.scanner.ScanSeries(id)
 }
