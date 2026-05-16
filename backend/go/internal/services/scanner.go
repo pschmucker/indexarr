@@ -336,7 +336,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	for _, episodeID := range episodesToDelete {
 		if err := repository.DeleteEpisode(s.db, episodeID); err != nil {
 			errMsg := fmt.Sprintf("Failed to remove missing episode %d: %v", episodeID, err)
-			log.Printf(errMsg)
+			log.Printf("%s", errMsg)
 			result.Errors = append(result.Errors, errMsg)
 		}
 	}
@@ -351,7 +351,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 		log.Printf("All episodes missing from disk, deleting series: %s", series.Title)
 		if err := repository.DeleteSeries(s.db, seriesID); err != nil {
 			errMsg := fmt.Sprintf("Failed to delete series: %v", err)
-			log.Printf(errMsg)
+			log.Printf("%s", errMsg)
 			result.Errors = append(result.Errors, errMsg)
 		}
 		return result, nil
