@@ -36,7 +36,7 @@ func NewScanner(db *sql.DB, cfg *config.Config, broadcaster *Broadcaster) *Scann
 		config:      cfg,
 		extractor:   NewExtractor(cfg.MediainfoPath, cfg.ScanTimeout),
 		tmdb:        NewTMDBClient(cfg.TMDBAPIKey),
-		tv:          NewTVClient(cfg.TMDBAPIKey), // Uses TMDB for TV shows
+		tv:          NewTVClient(cfg.TVDBAPIKey, db), // Uses TVDB API v4 for TV shows
 		broadcaster: broadcaster,
 		stopChan:    make(chan struct{}),
 	}
@@ -381,9 +381,9 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 		}
 	}
 
-	// Re-enrich series metadata from TVDB
-	if err := s.tv.EnrichSeries(series); err != nil {
-		log.Printf("TVDB enrichment failed during refresh for %s: %v", series.Title, err)
+	// Re-enrich series metadata from TMDB
+	if err := s.tmdb.EnrichSeries(series); err != nil {
+		log.Printf("TMDB enrichment failed during refresh for %s: %v", series.Title, err)
 	}
 
 	// Update series in database
@@ -551,15 +551,15 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 		}
 
 		// Try to enrich with TMDB metadata
-		if err := s.tv.EnrichSeries(newSeries); err != nil {
-			log.Printf("TMDB TV enrichment failed for %s: %v", parsed.Title, err)
+		if err := s.tmdb.EnrichSeries(newSeries); err != nil {
+			log.Printf("TMDB enrichment failed for %s: %v", parsed.Title, err)
 		}
 
-		// Check if series with same TVDB ID already exists (prevents duplicates)
-		if newSeries.TVDBId > 0 {
-			existingSeries, err := repository.GetSeriesByTVDBId(s.db, newSeries.TVDBId)
+		// Check if series with same TMDB ID already exists (prevents duplicates)
+		if newSeries.TMDBId > 0 {
+			existingSeries, err := repository.GetSeriesByTMDBId(s.db, newSeries.TMDBId)
 			if err != nil {
-				return fmt.Errorf("failed to lookup series by TVDB ID: %w", err)
+				return fmt.Errorf("failed to lookup series by TMDB ID: %w", err)
 			}
 			if existingSeries != nil {
 				// Series already exists, reuse it
@@ -579,7 +579,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 				log.Printf("Added series: %s (TMDB ID: %d, TVDB ID: %d)", newSeries.Title, seriesTMDBID, seriesTVDBID)
 			}
 		} else {
-			// No TVDB ID, insert new series anyway
+			// No TMDB ID, insert new series anyway
 			seriesID, err = repository.InsertSeries(s.db, newSeries)
 			if err != nil {
 				return fmt.Errorf("failed to insert series: %w", err)
@@ -607,7 +607,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 	}
 
 	// Try to enrich episode with TMDB metadata
-	if err := s.tv.EnrichEpisode(episode, seriesTMDBID); err != nil {
+	if err := s.tmdb.EnrichEpisode(episode, seriesTMDBID); err != nil {
 		log.Printf("TMDB episode enrichment failed: %v", err)
 	}
 
