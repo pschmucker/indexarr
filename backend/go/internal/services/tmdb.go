@@ -390,16 +390,8 @@ func (c *TMDBClient) EnrichSeries(series *models.Series) error {
 	series.Synopsis = details.Overview
 	series.Rating = details.VoteAverage
 	series.Popularity = details.Popularity
-
-	// ----------------------------------------------------
-	// -------------  To review !! ------------------------
-	// ----------------------------------------------------
-	// series.TVDBId = int64(details.ExternalIDs.TVDBID)
-	series.TVDBId = int64(details.ID)
-	// ----------------------------------------------------
-	// ----------------------------------------------------
-	// ----------------------------------------------------
-
+	series.TMDBId = int64(details.ID)
+	series.TVDBId = int64(details.ExternalIDs.TVDBID)
 	series.IMDbId = details.ExternalIDs.IMDbID
 	series.SeasonCount = details.NumberOfSeasons
 	series.EpisodeCount = details.NumberOfEpisodes

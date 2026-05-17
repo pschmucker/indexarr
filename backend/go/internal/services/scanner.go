@@ -540,6 +540,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 
 	var seriesID int64
 	var seriesTMDBID int
+	var seriesTVDBID int
 
 	if series == nil {
 		// Create new series
@@ -563,8 +564,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 			if existingSeries != nil {
 				// Series already exists, reuse it
 				seriesID = existingSeries.ID
-				seriesTMDBID = int(existingSeries.TVDBId)
-				log.Printf("Found existing series: %s (TVDB ID: %d)", existingSeries.Title, newSeries.TVDBId)
+				seriesTMDBID = int(existingSeries.TMDBId)
+				seriesTVDBID = int(existingSeries.TVDBId)
+				log.Printf("Found existing series: %s (TMDB ID: %d, TVDB ID: %d)", existingSeries.Title, seriesTMDBID, seriesTVDBID)
 				// Skip the InsertSeries step below
 			} else {
 				// New series, insert it
@@ -572,8 +574,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 				if err != nil {
 					return fmt.Errorf("failed to insert series: %w", err)
 				}
-				seriesTMDBID = int(newSeries.TVDBId)
-				log.Printf("Added series: %s (TVDB ID: %d)", newSeries.Title, newSeries.TVDBId)
+				seriesTMDBID = int(newSeries.TMDBId)
+				seriesTVDBID = int(newSeries.TVDBId)
+				log.Printf("Added series: %s (TMDB ID: %d, TVDB ID: %d)", newSeries.Title, seriesTMDBID, seriesTVDBID)
 			}
 		} else {
 			// No TVDB ID, insert new series anyway
@@ -581,12 +584,13 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 			if err != nil {
 				return fmt.Errorf("failed to insert series: %w", err)
 			}
-			seriesTMDBID = int(newSeries.TVDBId)
-			log.Printf("Added series: %s (no TVDB ID)", newSeries.Title)
+			seriesTMDBID = int(newSeries.TMDBId)
+			log.Printf("Added series: %s (no TMDB ID)", newSeries.Title)
 		}
 	} else {
 		seriesID = series.ID
-		seriesTMDBID = int(series.TVDBId)
+		seriesTMDBID = int(series.TMDBId)
+		seriesTVDBID = int(series.TVDBId)
 	}
 
 	// Create episode
