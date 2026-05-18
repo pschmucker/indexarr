@@ -85,6 +85,8 @@ export const AppContextProvider = ({ children }: AppContextProviderProps) => {
         case 'scan_start':
           newStatus.status = 'running';
           newStatus.startedAt = msg.startedAt;
+          newStatus.filesFound = 0;
+          newStatus.filesProcessed = 0;
           newStatus.completedAt = undefined;
           newStatus.errorMessage = undefined;
           break;
