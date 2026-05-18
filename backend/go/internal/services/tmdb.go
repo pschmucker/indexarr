@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -146,11 +147,18 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 		params.Set("year", strconv.Itoa(year))
 	}
 
+	// Get time before request for logging
+	startTime := time.Now()
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/search/movie?%s", tmdbBaseURL, params.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Log request duration in milliseconds
+	duration := time.Since(startTime)
+	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -176,11 +184,18 @@ func (c *TMDBClient) SearchTV(title string) (*TMDBTVSearchResult, error) {
 	params.Set("query", title)
 	params.Set("language", "en-US")
 
+	// Get time before request for logging
+	startTime := time.Now()
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/search/tv?%s", tmdbBaseURL, params.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Log request duration in milliseconds
+	duration := time.Since(startTime)
+	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -206,11 +221,18 @@ func (c *TMDBClient) GetMovieDetails(tmdbID int) (*TMDBMovieDetails, error) {
 	params.Set("language", "fr-FR")
 	params.Set("append_to_response", "credits")
 
+	// Get time before request for logging
+	startTime := time.Now()
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/movie/%d?%s", tmdbBaseURL, tmdbID, params.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Log request duration in milliseconds
+	duration := time.Since(startTime)
+	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/movie/%d?api_key=******&language=fr-FR&append_to_response=credits", tmdbBaseURL, tmdbID), resp.StatusCode, duration.Milliseconds())
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -236,11 +258,18 @@ func (c *TMDBClient) GetTVDetails(tmdbID int) (*TMDBTVDetails, error) {
 	params.Set("language", "fr-FR")
 	params.Set("append_to_response", "external_ids")
 
+	// Get time before request for logging
+	startTime := time.Now()
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/tv/%d?%s", tmdbBaseURL, tmdbID, params.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Log request duration in milliseconds
+	duration := time.Since(startTime)
+	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/tv/%d?api_key=******&language=fr-FR&append_to_response=external_ids", tmdbBaseURL, tmdbID), resp.StatusCode, duration.Milliseconds())
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -265,11 +294,18 @@ func (c *TMDBClient) GetEpisodeDetails(tmdbID, season, episode int) (*TMDBEpisod
 	params.Set("api_key", c.apiKey)
 	params.Set("language", "fr-FR")
 
+	// Get time before request for logging
+	startTime := time.Now()
+
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/tv/%d/season/%d/episode/%d?%s", tmdbBaseURL, tmdbID, season, episode, params.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Log request duration in milliseconds
+	duration := time.Since(startTime)
+	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/tv/%d/season/%d/episode/%d?api_key=******&language=fr-FR", tmdbBaseURL, tmdbID, season, episode), resp.StatusCode, duration.Milliseconds())
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
