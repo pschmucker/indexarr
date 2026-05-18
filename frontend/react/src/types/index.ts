@@ -33,6 +33,7 @@ export interface Series {
   status: 'complete' | 'ongoing' | 'partial';
   fileSize: number;
   dateAdded: string;
+  tmdbId: number;
   tvdbId: number;
   imdbId: string;
   poster?: string;

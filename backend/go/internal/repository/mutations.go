@@ -279,11 +279,11 @@ func InsertSeries(db *sql.DB, series *models.Series) (int64, error) {
 		defer tx.Rollback()
 
 		result, err := tx.Exec(`
-			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO series (title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, series.Title, series.YearStart, series.YearEnd, series.SeasonCount, series.EpisodeCount,
 			series.Synopsis, series.Genres, series.Rating, series.Popularity, series.Status,
-			series.FileSize, series.DateAdded, series.TVDBId, series.IMDbId, series.Poster)
+			series.FileSize, series.DateAdded, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster)
 		if err != nil {
 			return err
 		}
@@ -398,11 +398,11 @@ func GetSeriesByTitle(db *sql.DB, title string) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster
 		FROM series WHERE LOWER(title) = LOWER(?)
 	`, title).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TVDBId, &series.IMDbId, &poster)
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster)
 	if poster.Valid {
 		series.Poster = &poster.String
 	} else {
@@ -417,16 +417,16 @@ func GetSeriesByTitle(db *sql.DB, title string) (*models.Series, error) {
 	return &series, nil
 }
 
-// GetSeriesByTVDBId finds a series by TVDB ID
-func GetSeriesByTVDBId(db *sql.DB, tvdbID int64) (*models.Series, error) {
+// GetSeriesByTMDBId finds a series by TMDB ID
+func GetSeriesByTMDBId(db *sql.DB, tmdbID int64) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
-		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tvdb_id, imdb_id, poster
-		FROM series WHERE tvdb_id = ?
-	`, tvdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster
+		FROM series WHERE tmdb_id = ?
+	`, tmdbID).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
-		&series.FileSize, &series.DateAdded, &series.TVDBId, &series.IMDbId, &poster)
+		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster)
 	if poster.Valid {
 		series.Poster = &poster.String
 	} else {
@@ -597,10 +597,10 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		// Update series
 		_, err = tx.Exec(`
 			UPDATE series
-			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tvdb_id = ?, imdb_id = ?, poster = ?
+			SET title = ?, year_start = ?, year_end = ?, synopsis = ?, genres = ?, rating = ?, popularity = ?, status = ?, file_size = ?, tmdb_id = ?, tvdb_id = ?, imdb_id = ?, poster = ?
 			WHERE id = ?
 		`, series.Title, series.YearStart, series.YearEnd, series.Synopsis, series.Genres, series.Rating, series.Popularity,
-			series.Status, series.FileSize, series.TVDBId, series.IMDbId, series.Poster, series.ID)
+			series.Status, series.FileSize, series.TMDBId, series.TVDBId, series.IMDbId, series.Poster, series.ID)
 		if err != nil {
 			return err
 		}
@@ -623,5 +623,39 @@ func UpdateSeries(db *sql.DB, series *models.Series) error {
 		}
 
 		return tx.Commit()
+	})
+}
+
+// GetTVDBToken retrieves the stored TVDB bearer token (if exists and not expired)
+func GetTVDBToken(db *sql.DB) (string, time.Time, error) {
+	var token string
+	var expiresAt string
+
+	err := db.QueryRow(`SELECT token, expires_at FROM tvdb_tokens WHERE id = 1`).Scan(&token, &expiresAt)
+	if err == sql.ErrNoRows {
+		return "", time.Time{}, nil // No token stored
+	}
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	// Parse expiry time
+	expiry, err := time.Parse(time.RFC3339, expiresAt)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return token, expiry, nil
+}
+
+// SaveTVDBToken stores the TVDB bearer token with expiry time
+func SaveTVDBToken(db *sql.DB, token string, expiresAt time.Time) error {
+	return retryOnLock(func() error {
+		// Use INSERT OR REPLACE to ensure only one token exists
+		_, err := db.Exec(`
+			INSERT OR REPLACE INTO tvdb_tokens (id, token, expires_at, created_at)
+			VALUES (1, ?, ?, ?)
+		`, token, expiresAt.Format(time.RFC3339), time.Now().Format(time.RFC3339))
+		return err
 	})
 }
