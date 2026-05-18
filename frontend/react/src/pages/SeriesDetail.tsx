@@ -217,58 +217,60 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
-                <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  4K
-                </span>
-              )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
-                <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  1080p
-                </span>
-              )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
-                <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  Dolby Vision
-                </span>
-              )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
-                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  HDR10+
-                </span>
-              )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
-                <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  HDR10
-                </span>
-              )}
-              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
-                <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  TrueHD
-                </span>
-              )}
-              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
-                <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  Dolby Digital Plus
-                </span>
-              )}
-              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
-                <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  Atmos
-                </span>
-              )}
-              {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
-                <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  DTS
-                </span>
-              )}
-              {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec && (
-                <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
-                  {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec}
-                </span>
-              )}
-            </div>
+            {series.seasons?.[0]?.episodes && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('3840') && (
+                  <span className={comStyles['badge-4k']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    4K
+                  </span>
+                )}
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.resolution.includes('1920') && (
+                  <span className={comStyles['badge-1080p']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    1080p
+                  </span>
+                )}
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('Dolby') && (
+                  <span className={comStyles['badge-dv']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    Dolby Vision
+                  </span>
+                )}
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                  <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    HDR10+
+                  </span>
+                )}
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10') && !series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.hdr.includes('HDR10+') && (
+                  <span className={comStyles['badge-hdr']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    HDR10
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'TrueHD') && (
+                  <span className={comStyles['badge-truehd']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    TrueHD
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'E-AC-3') && (
+                  <span className={comStyles['badge-ddplus']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    Dolby Digital Plus
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec.includes('Atmos')) && (
+                  <span className={comStyles['badge-atmos']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    Atmos
+                  </span>
+                )}
+                {(series.seasons?.[0]?.episodes[0]?.mediaInfo?.audioTracks ?? []).find((track) => track.codec === 'DTS') && (
+                  <span className={comStyles['badge-dts']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    DTS
+                  </span>
+                )}
+                {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec && (
+                  <span className={comStyles['badge-codec']} style={{ fontSize: '10px', padding: '3px 8px' }}>
+                    {series.seasons?.[0]?.episodes[0]?.mediaInfo?.videoTracks?.[0]?.codec}
+                  </span>
+                )}
+              </div>
+            )}
 
             <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.6, maxWidth: '560px' }}>
               {series.synopsis}
@@ -320,7 +322,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
         <div style={{ padding: '16px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <h2 style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
-              Saison {season.number} — {season.episodes.length} épisodes
+              Saison {season.number} — {season.episodes?.length} épisodes
             </h2>
             <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
               <span style={{ color: '#1D9E75' }}>{season.availableEps} disponibles</span>
@@ -329,7 +331,7 @@ export const SeriesDetail = ({ seriesId }: SeriesDetailProps) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {season.episodes.map((ep) => (
+            {(season.episodes || []).map((ep) => (
               <div
                 key={ep.id}
                 style={{
