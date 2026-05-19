@@ -393,14 +393,14 @@ func UpdateEpisode(db *sql.DB, episode *models.Episode) error {
 	})
 }
 
-// GetSeriesByTitle finds a series by title (case-insensitive)
-func GetSeriesByTitle(db *sql.DB, title string) (*models.Series, error) {
+// GetSeriesByTitleAndYear finds a series by title and year (case-insensitive)
+func GetSeriesByTitleAndYear(db *sql.DB, title string, year int) (*models.Series, error) {
 	var series models.Series
 	var poster sql.NullString
 	err := db.QueryRow(`
 		SELECT id, title, year_start, year_end, season_count, episode_count, synopsis, genres, rating, popularity, status, file_size, date_added, tmdb_id, tvdb_id, imdb_id, poster, slug
-		FROM series WHERE LOWER(title) = LOWER(?)
-	`, title).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
+		FROM series WHERE LOWER(title) = LOWER(?) AND year_start = ?
+	`, title, year).Scan(&series.ID, &series.Title, &series.YearStart, &series.YearEnd, &series.SeasonCount, &series.EpisodeCount,
 		&series.Synopsis, &series.Genres, &series.Rating, &series.Popularity, &series.Status,
 		&series.FileSize, &series.DateAdded, &series.TMDBId, &series.TVDBId, &series.IMDbId, &poster, &series.Slug)
 	if poster.Valid {

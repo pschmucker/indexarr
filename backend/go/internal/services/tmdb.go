@@ -158,7 +158,11 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+	if year > 0 {
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s&year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
+	} else {
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/movie?api_key=******&language=fr-FR&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -170,19 +174,25 @@ func (c *TMDBClient) SearchMovie(title string, year int) (*TMDBSearchResult, err
 		return nil, err
 	}
 
+	// Log number of results found
+	log.Printf("Found %d results for movie '%s' (%d)", result.TotalResults, title, year)
+
 	return &result, nil
 }
 
 // SearchTV searches for a TV show by title
-func (c *TMDBClient) SearchTV(title string) (*TMDBTVSearchResult, error) {
+func (c *TMDBClient) SearchTV(title string, year int) (*TMDBTVSearchResult, error) {
 	if c.apiKey == "" {
 		return nil, fmt.Errorf("TMDB API key not configured")
 	}
 
 	params := url.Values{}
 	params.Set("api_key", c.apiKey)
-	params.Set("query", title)
 	params.Set("language", "en-US")
+	params.Set("query", title)
+	if year > 0 {
+		params.Set("first_air_date_year", strconv.Itoa(year))
+	}
 
 	// Get time before request for logging
 	startTime := time.Now()
@@ -195,7 +205,12 @@ func (c *TMDBClient) SearchTV(title string) (*TMDBTVSearchResult, error) {
 
 	// Log request duration in milliseconds
 	duration := time.Since(startTime)
-	log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+
+	if year > 0 {
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s&first_air_date_year=%d", tmdbBaseURL, title, year), resp.StatusCode, duration.Milliseconds())
+	} else {
+		log.Printf("GET %s - %d (%d ms)", fmt.Sprintf("%s/search/tv?api_key=******&language=en-US&query=%s", tmdbBaseURL, title), resp.StatusCode, duration.Milliseconds())
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -205,6 +220,13 @@ func (c *TMDBClient) SearchTV(title string) (*TMDBTVSearchResult, error) {
 	var result TMDBTVSearchResult
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
+	}
+
+	// Log number of results found
+	if year > 0 {
+		log.Printf("Found %d results for series '%s' (%d)", result.TotalResults, title, year)
+	} else {
+		log.Printf("Found %d results for series '%s'", result.TotalResults, title)
 	}
 
 	return &result, nil
@@ -403,7 +425,7 @@ func (c *TMDBClient) EnrichSeries(series *models.Series) error {
 	}
 
 	// Search for the series
-	results, err := c.SearchTV(series.Title)
+	results, err := c.SearchTV(series.Title, series.YearStart)
 	if err != nil {
 		return err
 	}
