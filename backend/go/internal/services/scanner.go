@@ -675,7 +675,8 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 	// Get current time
 	processStart := time.Now()
 
-	normalizedTitle := strings.ToLower(strings.TrimSpace(parsed.Title))
+	// Normalize title: trimmed and lowercased title concatenated with year
+	normalizedTitle := fmt.Sprintf("%s (%d)", strings.ToLower(strings.TrimSpace(parsed.Title)), parsed.Year)
 
 	// Check cache for series by normalized title first
 	var series *models.Series
@@ -684,17 +685,17 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 	if s.cache.seriesByTitle != nil {
 		if cached, ok := s.cache.seriesByTitle[normalizedTitle]; ok {
 			series = cached
-			log.Printf("[Cache] Series found in cache: %s", parsed.Title)
+			log.Printf("[Cache] Series found in cache: %s (%d)", parsed.Title, parsed.Year)
 		} else if ferr, failed := s.cache.failedSeriesByTitle[normalizedTitle]; failed {
-			log.Printf("[Cache] Skipping enrichment for series '%s' due to previous failure: %v", parsed.Title, ferr)
+			log.Printf("[Cache] Skipping enrichment for series '%s' (%d) due to previous failure: %v", parsed.Title, parsed.Year, ferr)
 			return ferr
 		}
 	}
 
 	// If not in cache, lookup in database
 	if series == nil {
-		log.Printf("Looking up series in database: %s", parsed.Title)
-		series, err = repository.GetSeriesByTitle(s.db, parsed.Title)
+		log.Printf("Looking up series in database: %s (%d)", parsed.Title, parsed.Year)
+		series, err = repository.GetSeriesByTitleAndYear(s.db, parsed.Title, parsed.Year)
 		if err != nil {
 			s.cache.failedSeriesByTitle[normalizedTitle] = err
 			return fmt.Errorf("failed to lookup series: %w", err)
@@ -708,7 +709,7 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 			}
 
 			s.cache.seriesByTitle[normalizedTitle] = series
-			log.Printf("[Cache] Added series to cache: %s", series.Title)
+			log.Printf("[Cache] Added series to cache: %s (%d)", series.Title, series.YearStart)
 		}
 	}
 
@@ -717,11 +718,12 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 	var seriesTVDBID int
 
 	if series == nil {
-		log.Printf("Series not found in database, creating new series: %s", parsed.Title)
+		log.Printf("Series not found in database, creating new series: %s (%d)", parsed.Title, parsed.Year)
 
 		// Create new series
 		newSeries := &models.Series{
 			Title:     parsed.Title,
+			YearStart: parsed.Year,
 			Slug:      slugify(parsed.Title),
 			Status:    "ongoing",
 			DateAdded: time.Now().Format(time.RFC3339),
