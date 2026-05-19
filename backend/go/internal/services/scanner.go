@@ -21,9 +21,10 @@ type scanCache struct {
 	// Series lookup by normalized title (avoids repeated DB queries)
 	seriesByTitle map[string]*models.Series
 	// Full series metadata by TVDB ID (from extended endpoint)
-	seriesExtendedByTVDBId map[int]*TVDBSeriesExtended
+	// seriesExtendedByTVDBId map[int]*TVDBSeriesExtended
 	// All episodes by series TVDB ID (from bulk episodes endpoint)
-	episodesByTVDBId map[int][]TVDBBulkEpisode
+	// episodesByTVDBId map[int][]TVDBBulkEpisode
+	episodesByTVDBId map[int]TVDBAllEpisodesResponse
 	// Failed enrichment tracking (prevents retry loops)
 	failedSeriesByTitle map[string]error
 }
@@ -80,10 +81,11 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	// Initialize per-scan cache for API call optimization
 	s.cache = &scanCache{
-		seriesByTitle:          make(map[string]*models.Series),
-		seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
-		episodesByTVDBId:       make(map[int][]TVDBBulkEpisode),
-		failedSeriesByTitle:    make(map[string]error),
+		seriesByTitle: make(map[string]*models.Series),
+		// seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
+		// episodesByTVDBId:    make(map[int][]TVDBBulkEpisode),
+		episodesByTVDBId:    make(map[int]TVDBAllEpisodesResponse),
+		failedSeriesByTitle: make(map[string]error),
 	}
 
 	log.Println("Starting scan")
@@ -493,31 +495,34 @@ func (s *Scanner) isLibraryPath(path string) bool {
 // This dramatically reduces API calls: instead of 1 call per episode, we fetch everything at once
 func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 	// Check if already fetched
-	if _, exists := s.cache.seriesExtendedByTVDBId[tvdbID]; exists {
-		log.Printf("[Cache] Series metadata already cached for TVDB ID %d", tvdbID)
-		return nil
-	}
+	// if _, exists := s.cache.seriesExtendedByTVDBId[tvdbID]; exists {
+	// 	log.Printf("[Cache] Series metadata already cached for TVDB ID %d", tvdbID)
+	// 	return nil
+	// }
 
 	log.Printf("Pre-fetching all metadata for series TVDB ID %d...", tvdbID)
 
-	// Fetch extended series metadata (includes seasons array)
-	seriesExtended, err := s.tv.GetTVDetails(tvdbID)
-	if err != nil {
-		return fmt.Errorf("failed to fetch series extended metadata: %w", err)
-	}
+	// // Fetch extended series metadata (includes seasons array)
+	// seriesExtended, err := s.tv.GetTVDetails(tvdbID)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to fetch series extended metadata: %w", err)
+	// }
 
-	s.cache.seriesExtendedByTVDBId[tvdbID] = seriesExtended
-	log.Printf("[Cache] Successfully cached series metadata: %d seasons", len(seriesExtended.Data.Seasons))
+	// s.cache.seriesExtendedByTVDBId[tvdbID] = seriesExtended
+	// log.Printf("[Cache] Successfully cached series metadata: %d seasons", len(seriesExtended.Data.Seasons))
 
 	// Fetch all episodes in bulk
 	allEpisodes, err := s.tv.GetAllEpisodes(tvdbID, "fra")
 	if err != nil {
 		return fmt.Errorf("failed to fetch bulk episodes: %w", err)
 	}
-	s.cache.episodesByTVDBId[tvdbID] = allEpisodes.Data.Episodes
+	// s.cache.episodesByTVDBId[tvdbID] = allEpisodes.Data.Episodes
+	s.cache.episodesByTVDBId[tvdbID] = *allEpisodes
 
-	log.Printf("[Cache] Successfully cached episodes data: %d episodes, %d seasons",
-		len(allEpisodes.Data.Episodes), len(seriesExtended.Data.Seasons))
+	// log.Printf("[Cache] Successfully cached episodes data: %d episodes, %d seasons",
+	// 	len(allEpisodes.Data.Episodes), len(seriesExtended.Data.Seasons))
+	log.Printf("[Cache] Successfully cached episodes data: %d episodes",
+		len(allEpisodes.Data.Episodes))
 
 	return nil
 }
@@ -532,7 +537,7 @@ func (s *Scanner) enrichEpisodeFromCache(episode *models.Episode, seriesTVDBID i
 	}
 
 	// Find matching episode by season and episode number
-	for _, ep := range cachedEpisodes {
+	for _, ep := range cachedEpisodes.Data.Episodes {
 		if ep.SeasonNumber == seasonNum && ep.Number == episodeNum {
 			episode.Title = ep.Name
 			if episode.Duration == 0 && ep.Runtime > 0 {
@@ -551,8 +556,14 @@ func (s *Scanner) enrichEpisodeFromCache(episode *models.Episode, seriesTVDBID i
 
 // processFile handles a single media file
 func (s *Scanner) processFile(filePath string, result *models.ScanResult) error {
+	// Get time before processing for performance logging
+	processStart := time.Now()
+
 	// Parse filename
 	parsed := ParseFilename(filePath)
+
+	// Get time before processing for performance logging
+	mediainfoStart := time.Now()
 
 	// Extract media info
 	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
@@ -566,10 +577,22 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 		}
 	}
 
+	mediainfoDuration := time.Since(mediainfoStart)
+	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
+
+	var processError error
+
 	if parsed.IsSeries {
-		return s.processEpisode(filePath, parsed, mediaInfo, fileSize, duration, result)
+		processError = s.processEpisode(filePath, parsed, mediaInfo, fileSize, duration, result)
+	} else {
+		processError = s.processMovie(filePath, parsed, mediaInfo, fileSize, duration, result)
 	}
-	return s.processMovie(filePath, parsed, mediaInfo, fileSize, duration, result)
+
+	// Total processing time for the file
+	processDuration := time.Since(processStart)
+	log.Printf("Total processing time for file %s: %d ms", filePath, processDuration.Milliseconds())
+
+	return processError
 }
 
 // processMovie handles a movie file
@@ -649,6 +672,9 @@ func slugify(title string) string {
 
 // processEpisode handles a TV episode file
 func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
+	// Get current time
+	processStart := time.Now()
+
 	normalizedTitle := strings.ToLower(strings.TrimSpace(parsed.Title))
 
 	// Check cache for series by normalized title first
@@ -674,6 +700,13 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 			return fmt.Errorf("failed to lookup series: %w", err)
 		} else if series != nil {
 			log.Printf("Series found in database: %s (TMDB ID: %d, TVDB ID: %d)", series.Title, series.TMDBId, series.TVDBId)
+
+			// Try to enrich with TMDB metadata
+			if err := s.tmdb.EnrichSeries(series); err != nil {
+				log.Printf("TMDB enrichment failed for %s: %v", parsed.Title, err)
+				s.cache.failedSeriesByTitle[normalizedTitle] = err
+			}
+
 			s.cache.seriesByTitle[normalizedTitle] = series
 			log.Printf("[Cache] Added series to cache: %s", series.Title)
 		}
@@ -765,8 +798,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 				// Continue anyway - we can still process episodes without bulk data
 			} else {
 				// Update series with artwork from cached extended data if available
-				if seriesExtended, exists := s.cache.seriesExtendedByTVDBId[seriesTVDBID]; exists {
-					series.TVDBId = int64(seriesTVDBID) // Ensure TVDB ID is set on series from cache
+				if seriesExtended, exists := s.cache.episodesByTVDBId[seriesTVDBID]; exists {
+					series.TVDBId = int64(seriesTVDBID)    // Ensure TVDB ID is set on series from cache
+					series.Slug = seriesExtended.Data.Slug // Update slug from TVDB data for better URL compatibility
 					if seriesExtended.Data.Image != "" {
 						series.Poster = &seriesExtended.Data.Image
 						if err := repository.UpdateSeries(s.db, series); err != nil {
@@ -779,15 +813,32 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 
 				log.Printf("Successfully pre-fetched series data for TVDB ID %d", seriesTVDBID)
 				// Create seasons from cached extended series data
-				if seriesExtended, exists := s.cache.seriesExtendedByTVDBId[seriesTVDBID]; exists {
-					for _, season := range seriesExtended.Data.Seasons {
+				if seriesExtended, exists := s.cache.episodesByTVDBId[seriesTVDBID]; exists {
+					// for _, season := range seriesExtended.Data.Seasons {
+					// 	// Only create "Aired Order" seasons (type.id == 1)
+					// 	if season.ID > 0 && season.Number > 0 && season.Type.ID == 1 {
+					// 		log.Printf("Creating season %d for series '%s' from cached data", season.Number, series.Title)
+					// 		_, err := repository.GetOrCreateSeason(s.db, seriesID, season.Number)
+					// 		if err != nil {
+					// 			log.Printf("Warning: Failed to create season %d: %v", season.Number, err)
+					// 		}
+					// 	}
+					// }
+					var seasons = make(map[int]bool) // Map to track created seasons and avoid duplicates
+
+					for _, episode := range seriesExtended.Data.Episodes {
 						// Only create "Aired Order" seasons (type.id == 1)
-						if season.ID > 0 && season.Number > 0 && season.Type.ID == 1 {
-							log.Printf("Creating season %d for series '%s' from cached data", season.Number, series.Title)
-							_, err := repository.GetOrCreateSeason(s.db, seriesID, season.Number)
-							if err != nil {
-								log.Printf("Warning: Failed to create season %d: %v", season.Number, err)
-							}
+						if episode.SeasonNumber > 0 {
+							seasons[episode.SeasonNumber] = true
+						}
+					}
+
+					for seasonNum := range seasons {
+						log.Printf("Creating season %d for series '%s' from cached data", seasonNum, series.Title)
+						_, err := repository.GetOrCreateSeason(s.db, seriesID, seasonNum)
+						if err != nil {
+							log.Printf("Warning: Failed to create season %d: %v", seasonNum, err)
+							// Continue creating other seasons even if one fails
 						}
 					}
 				}
@@ -807,8 +858,9 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 					log.Printf("Warning: Failed to pre-fetch series data for TVDB ID %d: %v", seriesTVDBID, err)
 				} else {
 					// Update series with artwork from cached extended data if available
-					if seriesExtended, exists := s.cache.seriesExtendedByTVDBId[seriesTVDBID]; exists {
-						series.TVDBId = int64(seriesTVDBID) // Ensure TVDB ID is set on series from cache
+					if seriesExtended, exists := s.cache.episodesByTVDBId[seriesTVDBID]; exists {
+						series.TVDBId = int64(seriesTVDBID)    // Ensure TVDB ID is set on series from cache
+						series.Slug = seriesExtended.Data.Slug // Update slug from TVDB data for better URL compatibility
 						if seriesExtended.Data.Image != "" {
 							series.Poster = &seriesExtended.Data.Image
 							if err := repository.UpdateSeries(s.db, series); err != nil {
@@ -889,6 +941,10 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 
 	// Update series counts
 	repository.UpdateSeriesCounts(s.db, seriesID)
+
+	processDuration := time.Since(processStart)
+	log.Printf("Processed episode in %d ms: %s S%02dE%02d - %s", processDuration.Milliseconds(), parsed.Title, parsed.Season, parsed.Episode, episode.Title)
+
 	return nil
 }
 
