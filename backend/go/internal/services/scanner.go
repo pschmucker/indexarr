@@ -24,7 +24,7 @@ type scanCache struct {
 	// seriesExtendedByTVDBId map[int]*TVDBSeriesExtended
 	// All episodes by series TVDB ID (from bulk episodes endpoint)
 	// episodesByTVDBId map[int][]TVDBBulkEpisode
-	episodesByTVDBId map[int]TVDBAllEpisodesResponse
+	episodesByTVDBId map[int]*TVDBAllEpisodesResponse
 	// Failed enrichment tracking (prevents retry loops)
 	failedSeriesByTitle map[string]error
 }
@@ -79,18 +79,6 @@ func (s *Scanner) Scan() (*models.ScanResult, error) {
 
 // ScanPaths performs a scan on specified paths (used for manual scans via API)
 func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
-	// Initialize per-scan cache for API call optimization
-	s.cache = &scanCache{
-		seriesByTitle: make(map[string]*models.Series),
-		// seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
-		// episodesByTVDBId:    make(map[int][]TVDBBulkEpisode),
-		episodesByTVDBId:    make(map[int]TVDBAllEpisodesResponse),
-		failedSeriesByTitle: make(map[string]error),
-	}
-
-	log.Println("Starting scan")
-	start := time.Now()
-
 	s.mu.Lock()
 	if s.running {
 		s.mu.Unlock()
@@ -98,14 +86,35 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 	}
 	s.running = true
 	s.stopChan = make(chan struct{})
+
+	// Initialize per-scan cache for API call optimization
+	s.cache = &scanCache{
+		seriesByTitle: make(map[string]*models.Series),
+		// seriesExtendedByTVDBId: make(map[int]*TVDBSeriesExtended),
+		// episodesByTVDBId:    make(map[int][]TVDBBulkEpisode),
+		episodesByTVDBId:    make(map[int]*TVDBAllEpisodesResponse),
+		failedSeriesByTitle: make(map[string]error),
+	}
+
 	s.mu.Unlock()
+
+	log.Println("Starting scan")
+	start := time.Now()
 
 	defer func() {
 		s.mu.Lock()
 		s.running = false
-		s.mu.Unlock()
+
+		select {
+		case <-s.stopChan:
+			// Already closed, do nothing
+		default:
+			close(s.stopChan)
+		}
+
 		// Clear per-scan cache
 		s.cache = nil
+		s.mu.Unlock()
 	}()
 
 	result := &models.ScanResult{
@@ -534,7 +543,7 @@ func (s *Scanner) preFetchSeriesData(tvdbID int) error {
 		return fmt.Errorf("failed to fetch bulk episodes: %w", err)
 	}
 	// s.cache.episodesByTVDBId[tvdbID] = allEpisodes.Data.Episodes
-	s.cache.episodesByTVDBId[tvdbID] = *allEpisodes
+	s.cache.episodesByTVDBId[tvdbID] = allEpisodes
 
 	// log.Printf("[Cache] Successfully cached episodes data: %d episodes, %d seasons",
 	// 	len(allEpisodes.Data.Episodes), len(seriesExtended.Data.Seasons))
@@ -579,8 +588,32 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 	// Parse filename
 	parsed := ParseFilename(filePath)
 
-	// Get time before processing for performance logging
-	mediainfoStart := time.Now()
+	var processError error
+
+	if parsed.IsSeries {
+		processError = s.processEpisode(filePath, parsed, result)
+	} else {
+		processError = s.processMovie(filePath, parsed, result)
+	}
+
+	// Total processing time for the file
+	processDuration := time.Since(processStart)
+	log.Printf("Total processing time for file %s: %d ms", filePath, processDuration.Milliseconds())
+
+	return processError
+}
+
+// processMovie handles a movie file
+func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
+	// Check if movie already exists by file path
+	exists, err := repository.MovieExistsByFilePath(s.db, filePath)
+	if err != nil {
+		return fmt.Errorf("failed to check for existing movie: %w", err)
+	}
+	if exists {
+		log.Printf("Movie already exists for file: %s", filePath)
+		return nil
+	}
 
 	// Extract media info
 	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
@@ -592,36 +625,6 @@ func (s *Scanner) processFile(filePath string, result *models.ScanResult) error 
 			AudioTracks:    []models.AudioTrack{},
 			SubtitleTracks: []models.SubtitleTrack{},
 		}
-	}
-
-	mediainfoDuration := time.Since(mediainfoStart)
-	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
-
-	var processError error
-
-	if parsed.IsSeries {
-		processError = s.processEpisode(filePath, parsed, mediaInfo, fileSize, duration, result)
-	} else {
-		processError = s.processMovie(filePath, parsed, mediaInfo, fileSize, duration, result)
-	}
-
-	// Total processing time for the file
-	processDuration := time.Since(processStart)
-	log.Printf("Total processing time for file %s: %d ms", filePath, processDuration.Milliseconds())
-
-	return processError
-}
-
-// processMovie handles a movie file
-func (s *Scanner) processMovie(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
-	// Check if movie already exists by file path
-	exists, err := repository.MovieExistsByFilePath(s.db, filePath)
-	if err != nil {
-		return fmt.Errorf("failed to check for existing movie: %w", err)
-	}
-	if exists {
-		log.Printf("Movie already exists for file: %s", filePath)
-		return nil
 	}
 
 	movie := &models.Movie{
@@ -688,7 +691,17 @@ func slugify(title string) string {
 }
 
 // processEpisode handles a TV episode file
-func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaInfo *models.MediaInfo, fileSize int64, duration int, result *models.ScanResult) error {
+func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, result *models.ScanResult) error {
+	// Check if episode already exists by file path
+	exists, err := repository.EpisodeExistsByFilePath(s.db, filePath)
+	if err != nil {
+		return fmt.Errorf("failed to check for existing episode: %w", err)
+	}
+	if exists {
+		log.Printf("Episode already exists for file: %s", filePath)
+		return nil
+	}
+
 	// Get current time
 	processStart := time.Now()
 
@@ -697,7 +710,6 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 
 	// Check cache for series by normalized title first
 	var series *models.Series
-	var err error
 
 	if s.cache.seriesByTitle != nil {
 		if cached, ok := s.cache.seriesByTitle[normalizedTitle]; ok {
@@ -891,6 +903,18 @@ func (s *Scanner) processEpisode(filePath string, parsed *ParsedFilename, mediaI
 					}
 				}
 			}
+		}
+	}
+
+	// Extract media info
+	mediaInfo, fileSize, duration, err := s.extractor.Extract(filePath)
+	if err != nil {
+		log.Printf("Mediainfo extraction failed for %s: %v", filePath, err)
+		// Continue with minimal info
+		mediaInfo = &models.MediaInfo{
+			VideoTracks:    []models.VideoTrack{},
+			AudioTracks:    []models.AudioTrack{},
+			SubtitleTracks: []models.SubtitleTrack{},
 		}
 	}
 

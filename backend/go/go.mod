@@ -1,6 +1,6 @@
 module indexarr
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/go-chi/chi/v5 v5.2.5
@@ -9,4 +9,5 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.44
+	golang.org/x/sys v0.44.0
 )

@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/sys/unix"
 
 	"indexarr/internal/models"
 )
@@ -76,11 +80,23 @@ func NewExtractor(mediainfoPath string, timeoutSeconds int) *Extractor {
 
 // Extract runs mediainfo on a file and returns parsed MediaInfo
 func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, error) {
+	// Get time before processing for performance logging
+	mediainfoStart := time.Now()
+
 	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, e.mediainfoPath, "--Output=JSON", filePath)
 	output, err := cmd.Output()
+
+	// We execute this immediately after the file is read, whether mediainfo succeeded or failed. .
+	// This ensures that we free up the cached file data as soon as possible, preventing memory bloat on Linux.
+	if f, openErr := os.Open(filePath); openErr == nil {
+		// Tell Linux we no longer need the cached parts of this heavy file
+		_ = unix.Fadvise(int(f.Fd()), 0, 0, unix.FADV_DONTNEED)
+		f.Close()
+	}
+
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
 			return nil, 0, 0, fmt.Errorf("mediainfo timed out after %v", e.timeout)
@@ -93,7 +109,12 @@ func (e *Extractor) Extract(filePath string) (*models.MediaInfo, int64, int, err
 		return nil, 0, 0, fmt.Errorf("failed to parse mediainfo JSON: %w", err)
 	}
 
-	return e.parseMediaInfo(&mi)
+	info, fileSize, duration, _ := e.parseMediaInfo(&mi)
+
+	mediainfoDuration := time.Since(mediainfoStart)
+	log.Printf("Mediainfo extraction took %d ms for file: %s", mediainfoDuration.Milliseconds(), filePath)
+
+	return info, fileSize, duration, nil
 }
 
 // parseMediaInfo converts MediainfoOutput to models.MediaInfo
