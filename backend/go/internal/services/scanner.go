@@ -261,10 +261,18 @@ func (s *Scanner) ScanPaths(paths []string) (*models.ScanResult, error) {
 
 // ScanMovie scans a single movie (used for manual refresh via API)
 func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
+	log.Printf("Starting movie refresh for ID: %d", movieID)
+	start := time.Now()
+
 	movie, err := repository.GetMovieByID(s.db, movieID)
 	if err != nil {
-		return nil, fmt.Errorf("movie not found: %w", err)
+		return nil, fmt.Errorf("failed to fetch movie: %w", err)
 	}
+	if movie == nil {
+		return nil, fmt.Errorf("movie not found with ID: %d", movieID)
+	}
+
+	log.Printf("Found movie: %s (%d)", movie.Title, movie.Year)
 
 	result, err := s.ScanPaths([]string{movie.FilePath})
 	if err != nil {
@@ -288,7 +296,14 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 			movie.Duration = duration / 60 // Convert seconds to minutes
 		}
 
-		// Fetch metadata from TMDB again to update any changes
+		// Parse filename
+		parsed := ParseFilename(movie.FilePath)
+
+		movie.Title = parsed.Title
+		movie.Year = parsed.Year
+		movie.Status = "available"
+
+		// Try to enrich with TMDB metadata
 		if err := s.tmdb.EnrichMovie(movie); err != nil {
 			log.Printf("TMDB enrichment failed during refresh for %s: %v", movie.Title, err)
 		} else {
@@ -302,9 +317,11 @@ func (s *Scanner) ScanMovie(movieID int64) (*models.ScanResult, error) {
 			result.FilesFound = 1
 			result.Errors = []string{}
 			result.EpisodesAdded = 0
-			result.MoviesAdded = 1
 		}
 	}
+
+	duration := time.Since(start)
+	log.Printf("Movie refresh completed in %d ms", duration.Milliseconds())
 
 	return result, nil
 }
@@ -327,7 +344,7 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 		return nil, fmt.Errorf("series not found with ID: %d", seriesID)
 	}
 
-	log.Printf("Found series: %s", series.Title)
+	log.Printf("Found series: %s (%d)", series.Title, series.YearStart)
 
 	// Step 2: Fetch all episodes to determine folders to scan
 	episodes, err := repository.GetAllEpisodesForSeries(s.db, seriesID)
@@ -431,8 +448,8 @@ func (s *Scanner) ScanSeries(seriesID int64) (*models.ScanResult, error) {
 	result.Errors = append(result.Errors, scanResult.Errors...)
 
 	duration := time.Since(start)
-	log.Printf("Series refresh completed in %v - %d files processed, %d episodes added, %d episodes deleted, %d errors",
-		duration.Round(time.Second), result.FilesProcessed, result.EpisodesAdded, len(episodesToDelete), len(result.Errors))
+	log.Printf("Series refresh completed in %d ms - %d files processed, %d episodes added, %d episodes deleted, %d errors",
+		duration.Milliseconds(), result.FilesProcessed, result.EpisodesAdded, len(episodesToDelete), len(result.Errors))
 
 	return result, nil
 }
